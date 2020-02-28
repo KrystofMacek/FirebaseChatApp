@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "866378975815",
+    "firebase_url": "https://fir-chatapp-3782d.firebaseio.com",
+    "project_id": "fir-chatapp-3782d",
+    "storage_bucket": "fir-chatapp-3782d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:866378975815:android:d0b96a8cbc108ca78ebf62",
+        "android_client_info": {
+          "package_name": "com.krystofmacek.firebasechatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "866378975815-c1i8uo47d8e0gfh0jke5c7gqttrilgnk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9eMHIIAV-1jXRbbb6yNzvuXLyubvWcvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "866378975815-c1i8uo47d8e0gfh0jke5c7gqttrilgnk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
