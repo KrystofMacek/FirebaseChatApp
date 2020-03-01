@@ -3,17 +3,24 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/item_chat">
+    android:id="@+id/item_profile">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="15dp">
+        android:padding="5dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/user_fire_icon_96"
+            android:layout_marginRight="10dp"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_weight="1">
 
@@ -21,17 +28,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Username"
-                android:textSize="18dp"
-                android:padding="5dp"
-                android:id="@+id/item_chat_username"/>
+                android:textSize="20dp"
+                android:paddingTop="10dp"
+                android:layout_weight="1"
+                android:id="@+id/item_profile_username"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="This is text of the most recent message in this chat"
-                android:textSize="14dp"
-                android:padding="5dp"
-                android:id="@+id/item_chat_lastMessage"/>
+                android:text="#Tag1 #tag2 #tag3"
+                android:textSize="16dp"
+                android:paddingBottom="15dp"
+                android:id="@+id/item_profile_tags"/>
 
         </LinearLayout>
 
@@ -40,7 +48,7 @@
             android:layout_height="match_parent"
             android:src="@drawable/ic_arrow"
             android:background="@color/colorPrimary"
-            android:id="@+id/item_chat_btnStartChat"
+            android:id="@+id/item_profile_btnStartChat"
             android:tint="@color/colorWhite"/>
 
     </LinearLayout>
