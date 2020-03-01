@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupNavigation(Bundle savedInstanceState) {
 
         heading = findViewById(R.id.toolbar_heading);
-        heading.setText("Home");
+        heading.setText("Profile");
 
         Toolbar toolbar = findViewById(R.id.toolbar_top);
         setSupportActionBar(toolbar);
@@ -75,24 +75,28 @@ public class MainActivity extends AppCompatActivity {
                         item.setChecked(true);
                         ft.addToBackStack("home");
                         ft.commit();
+                        heading.setText("Profile");
                         break;
                     case R.id.nav_item_chats:
                         ft.replace(R.id.fragment_container, new ChatsFragment(), tags.get(1));
                         item.setChecked(true);
                         ft.addToBackStack("chats");
                         ft.commit();
+                        heading.setText("Chats");
                         break;
                     case R.id.nav_item_search:
                         ft.replace(R.id.fragment_container, new SearchFragment(), tags.get(2));
                         item.setChecked(true);
                         ft.addToBackStack("search");
                         ft.commit();
+                        heading.setText("Search");
                         break;
                     case R.id.nav_item_friends:
                         ft.replace(R.id.fragment_container, new FriendsFragment(), tags.get(3));
                         item.setChecked(true);
                         ft.addToBackStack("friends");
                         ft.commit();
+                        heading.setText("Friends");
                         break;
                 }
                 return false;
@@ -141,15 +145,19 @@ public class MainActivity extends AppCompatActivity {
                     switch (tag) {
                         case "home":
                             botNavigation.getMenu().getItem(0).setChecked(true);
+                            heading.setText("Profile");
                             break;
                         case "chats":
                             botNavigation.getMenu().getItem(1).setChecked(true);
+                            heading.setText("Chats");
                             break;
                         case "search":
                             botNavigation.getMenu().getItem(2).setChecked(true);
+                            heading.setText("Search");
                             break;
                         case "friends":
                             botNavigation.getMenu().getItem(3).setChecked(true);
+                            heading.setText("Friends");
                             break;
                     }
                     return;

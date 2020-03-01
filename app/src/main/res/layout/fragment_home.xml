@@ -1,16 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.HomeFragment"
     android:id="@+id/fragment_home">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="HOME FRAGMENT" />
+        android:orientation="vertical">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorWhite"
+                    android:orientation="horizontal"
+                    android:padding="15dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="5dp"
+                        android:background="@color/colorWhite">
+
+                        <TextView
+                            android:id="@+id/fHome_username"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="40dp"
+                            android:padding="5dp"
+                            android:text="Username"
+                            android:textSize="20dp"
+                            android:background="@color/colorWhite"/>
+
+
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="#scubbadiewfweving #moretlfdfwefwsdfsfodreso #nffsdfsdfsdsds"
+                            android:textSize="16dp"
+                            />
+                    </LinearLayout>
+
+
+                    <ImageButton
+                        android:id="@+id/fHome_btnEditProfile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@color/fui_transparent"
+                        android:padding="5dp"
+                        android:src="@android:drawable/ic_menu_edit" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dp"
+            android:textAlignment="center"
+            android:text="Recent Messages"
+            android:textSize="18dp"
+            android:textColor="@color/colorWhite"
+            android:background="@color/colorPrimary"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fHome_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite"
+                android:minHeight="200dp" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+
+
+
+    </LinearLayout>
 
 
 </FrameLayout>
