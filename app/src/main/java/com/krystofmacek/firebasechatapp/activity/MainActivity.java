@@ -19,6 +19,9 @@ import android.widget.TextView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.fragments.ChatsFragment;
 import com.krystofmacek.firebasechatapp.fragments.FriendsFragment;
@@ -33,9 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private final ArrayList<String> tags =
             new ArrayList<>(Arrays.asList("home", "chats", "search", "friends"));
 
-    TextView heading;
-    BottomNavigationView botNavigation;
-
+    private TextView heading;
+    private BottomNavigationView botNavigation;
     FrameLayout frameLayout;
 
     @Override
@@ -43,8 +45,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setupNavigation(savedInstanceState);
-
+        setupNavigation();
     }
 
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
      Metody poskytující navigaci mezi Aktivitami
      setupNavigation(), onCreateOptionsMenu(Menu menu), onOptionsItemSelected(@NonNull MenuItem item)
      */
-    private void setupNavigation(Bundle savedInstanceState) {
+    private void setupNavigation() {
 
         heading = findViewById(R.id.toolbar_heading);
         heading.setText("Profile");
@@ -124,20 +125,22 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logout:
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(MainActivity.this, SignupActivity.class));
-                finish();
+                logout();
                 return true;
         }
         return false;
+    }
+
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(MainActivity.this, SignupActivity.class));
+        finish();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         Fragment currentFragment;
-
-
         for (String tag: tags) {
             currentFragment = getSupportFragmentManager().findFragmentByTag(tag);
             if(currentFragment != null) {

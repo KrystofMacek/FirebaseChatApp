@@ -5,10 +5,8 @@
     android:layout_height="match_parent"
     tools:context=".fragments.RecentConverasationsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="RECENT CHATS" />
-
+        android:layout_height="wrap_content"
+        android:id="@+id/fChats_Recent_recycler"/>
 </FrameLayout>
