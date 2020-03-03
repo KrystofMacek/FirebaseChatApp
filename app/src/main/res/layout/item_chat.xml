@@ -3,13 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/item_chat">
+    android:id="@+id/item_chat"
+    android:layout_marginTop="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="15dp">
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -18,30 +20,32 @@
             android:layout_weight="1">
 
             <TextView
+                android:id="@+id/item_chat_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:padding="10dp"
                 android:text="Username"
-                android:textSize="18dp"
-                android:padding="5dp"
-                android:id="@+id/item_chat_username"/>
+                android:textSize="18dp" />
 
             <TextView
+                android:id="@+id/item_chat_lastMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="10dp"
                 android:text="This is text of the most recent message in this chat"
-                android:textSize="14dp"
-                android:padding="5dp"
-                android:id="@+id/item_chat_lastMessage"/>
+                android:textSize="14dp" />
 
         </LinearLayout>
 
         <ImageButton
+            android:id="@+id/item_chat_btnStartChat"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_arrow"
             android:background="@color/colorPrimary"
-            android:id="@+id/item_chat_btnStartChat"
-            android:tint="@color/colorWhite"/>
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:src="@drawable/ic_arrow"
+            android:tint="@color/colorBlack" />
 
     </LinearLayout>
 

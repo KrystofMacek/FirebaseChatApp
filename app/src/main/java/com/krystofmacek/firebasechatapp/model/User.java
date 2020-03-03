@@ -1,5 +1,6 @@
 package com.krystofmacek.firebasechatapp.model;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -9,8 +10,8 @@ public class User {
     private String uid;
     private String displayName;
     private Map<String, String> location;
-    private List<String> tags;
-    private List<String> friends;
+    private List<String> tags = Collections.emptyList();
+    private List<String> friends = Collections.emptyList();
 
     public User() {
     }
