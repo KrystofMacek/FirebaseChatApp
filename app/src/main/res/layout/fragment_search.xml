@@ -30,14 +30,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/fFriends_currentLocation"
+                    android:id="@+id/fSearch_locationOutput"
                     android:textSize="18dp"
-                    android:text="Adress, adress 132"/>
+                    android:text="Adress, adress 132"
+                    />
             </LinearLayout>
 
             <Spinner
+                android:id="@+id/fSearch_locationSpinner"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:minWidth="80dp" />
 
 
         </LinearLayout>
@@ -47,6 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
+            android:id="@+id/fSearch_searchUserBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Search users"
@@ -59,7 +63,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/fFriends_recycler" />
+        android:id="@+id/fSearch_recycler"
+        />
 
 
 </LinearLayout>
