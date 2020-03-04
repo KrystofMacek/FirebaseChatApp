@@ -6,25 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
-
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.common.io.Resources;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
-import com.krystofmacek.firebasechatapp.model.Chat;
-import com.krystofmacek.firebasechatapp.model.Message;
 import com.krystofmacek.firebasechatapp.model.User;
 
-import java.util.Arrays;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHolder>{

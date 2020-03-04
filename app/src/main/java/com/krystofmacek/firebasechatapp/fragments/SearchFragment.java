@@ -48,7 +48,7 @@ public class SearchFragment extends Fragment {
     private Button searchUsersBtn;
 
     private FirebaseFirestore firestore;
-    private DocumentReference cuurentProfileRef;
+    private DocumentReference currentProfileRef;
     private FirebaseUser signedUser;
 
     private CollectionReference profilesCollectionRef;
@@ -73,7 +73,7 @@ public class SearchFragment extends Fragment {
         firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
         profilesCollectionRef = firestore.collection("Profiles");
-        cuurentProfileRef = profilesCollectionRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        currentProfileRef = profilesCollectionRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         requestLocation();
         setupLocationSpinner();
@@ -116,7 +116,7 @@ public class SearchFragment extends Fragment {
                             address.put("City", currentAddress.getSubAdminArea());
 
                             // aktualizace lokace ve firestore
-                            cuurentProfileRef.update("location", address);
+                            currentProfileRef.update("location", address);
 
                             locationOutput.setText(address.get("City"));
 
@@ -191,7 +191,7 @@ public class SearchFragment extends Fragment {
 
         final List<User> profiles = new ArrayList<>();
 
-        cuurentProfileRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        currentProfileRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(final DocumentSnapshot documentSnapshot) {
                 User user = documentSnapshot.toObject(User.class);
