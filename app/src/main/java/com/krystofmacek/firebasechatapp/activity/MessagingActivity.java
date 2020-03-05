@@ -150,11 +150,12 @@ public class MessagingActivity extends AppCompatActivity {
                 });
     }
 
-    private void sendMessageSetup(String chatId){
+    private void sendMessageSetup(final String chatId){
         final DocumentReference newMessageDoc = firestore.collection("Chats")
                 .document(chatId)
                 .collection("Messages")
                 .document();
+
         sendMsgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,6 +163,11 @@ public class MessagingActivity extends AppCompatActivity {
                 newMessageDoc.set(newMessage);
                 loadMessages(userId);
                 inputMessageText.setText("");
+
+                firestore.collection("Chats")
+                        .document(chatId)
+                        .update("lastMessageTime", newMessage.getTimestamp());
+
             }
         });
     }

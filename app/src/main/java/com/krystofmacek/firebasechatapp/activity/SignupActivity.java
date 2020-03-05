@@ -59,12 +59,6 @@ public class SignupActivity extends AppCompatActivity {
             // Successfully signed in
             if (resultCode == RESULT_OK) {
                 intent = new Intent(SignupActivity.this, MainActivity.class);
-
-                DocumentReference profile = FirebaseFirestore.getInstance()
-                        .collection("Profiles")
-                        .document();
-
-
                 startActivity(intent);
                 finish();
             } else {

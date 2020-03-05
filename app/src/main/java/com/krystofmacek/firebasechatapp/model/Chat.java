@@ -1,10 +1,13 @@
 package com.krystofmacek.firebasechatapp.model;
 
+import com.google.firebase.Timestamp;
+
 import java.util.List;
 
 public class Chat {
     private String uid;
     private List<String> members;
+    private Timestamp lastMessageTime;
 
     public Chat() {
     }
@@ -35,5 +38,13 @@ public class Chat {
             return members.get(1);
         }
         return members.get(0);
+    }
+
+    public Timestamp getLastMessageTime() {
+        return lastMessageTime;
+    }
+
+    public void setLastMessageTime(Timestamp lastMessageTime) {
+        this.lastMessageTime = lastMessageTime;
     }
 }

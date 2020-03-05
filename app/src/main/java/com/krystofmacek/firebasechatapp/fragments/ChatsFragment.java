@@ -1,12 +1,9 @@
 package com.krystofmacek.firebasechatapp.fragments;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 
 import com.google.android.material.tabs.TabLayout;
 import com.krystofmacek.firebasechatapp.R;
@@ -40,7 +37,7 @@ public class ChatsFragment extends Fragment {
                 new ViewPagerAdapter(getChildFragmentManager(),
                         FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
-        adapter.addFragment(new RecentConverasationsFragment(), "Recent");
+        adapter.addFragment(new RecentConversationsFragment(), "Recent");
         viewPager.setAdapter(adapter);
 
     }
