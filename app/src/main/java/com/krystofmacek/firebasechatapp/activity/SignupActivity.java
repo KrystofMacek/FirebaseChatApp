@@ -11,7 +11,10 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.krystofmacek.firebasechatapp.R;
+import com.krystofmacek.firebasechatapp.model.User;
 
 import java.util.Arrays;
 
@@ -56,6 +59,12 @@ public class SignupActivity extends AppCompatActivity {
             // Successfully signed in
             if (resultCode == RESULT_OK) {
                 intent = new Intent(SignupActivity.this, MainActivity.class);
+
+                DocumentReference profile = FirebaseFirestore.getInstance()
+                        .collection("Profiles")
+                        .document();
+
+
                 startActivity(intent);
                 finish();
             } else {

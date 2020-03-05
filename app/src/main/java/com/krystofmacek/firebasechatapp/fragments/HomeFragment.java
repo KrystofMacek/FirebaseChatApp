@@ -38,9 +38,9 @@ import androidx.recyclerview.widget.RecyclerView;
 public class HomeFragment extends Fragment {
 
     private FirebaseFirestore firestore;
-    private String currentUserUid;
-    private DocumentReference userProfile;
-    private User currentUser;
+    private String signedUserUid;
+    private DocumentReference signedUserProfileRef;
+    private User signedUser;
 
     private TextView viewTxtUsername;
     private TextView viewTxtTags;
@@ -60,7 +60,7 @@ public class HomeFragment extends Fragment {
 
         //firebase objects
         firestore = FirebaseFirestore.getInstance();
-        currentUserUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        signedUserUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         loadUser();
         setupDialog();
@@ -72,7 +72,7 @@ public class HomeFragment extends Fragment {
     private void loadRecentChats() {
         final List<Chat> chats = new ArrayList<>();
         firestore.collection("Chats")
-                .whereArrayContains("members", currentUserUid)
+                .whereArrayContains("members", signedUserUid)
                 .limit(5)
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -92,19 +92,25 @@ public class HomeFragment extends Fragment {
                 });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadRecentChats();
+    }
+
     // Nacteni dat o uzivateli
     private void loadUser() {
 
-        userProfile = firestore.collection("Profiles").document(currentUserUid);
-        userProfile.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        signedUserProfileRef = firestore.collection("Profiles").document(signedUserUid);
+        signedUserProfileRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot.exists()){
-                    currentUser = documentSnapshot.toObject(User.class);
-                    if(currentUser.getDisplayName().equals("") || currentUser.getDisplayName() == null) {
-                        viewTxtUsername.setText("Please setup your profile name");
+                    signedUser = documentSnapshot.toObject(User.class);
+                    if(signedUser.getDisplayName().equals("") || signedUser.getDisplayName() == null) {
+                        viewTxtUsername.setText("Please setup your profile");
                     } else {
-                        viewTxtUsername.setText(currentUser.getDisplayName());
+                        viewTxtUsername.setText(signedUser.getDisplayName());
                     }
                     createTagsString(viewTxtTags);
                 }
@@ -143,10 +149,13 @@ public class HomeFragment extends Fragment {
                 final TextView tagOutput = editProfileDialog.findViewById(R.id.dialog_tagList);
 
                 //naplneni view elementu
-                if(currentUser.getDisplayName() != null){
-                    editUsername.setText(currentUser.getDisplayName());
+                if(signedUser == null) {
+                    signedUser = new User();
                 }
-                if(currentUser.getTags() != null) {
+                if(signedUser.getDisplayName() != null){
+                    editUsername.setText(signedUser.getDisplayName());
+                }
+                if(signedUser.getTags() != null) {
                     createTagsString(tagOutput);
                 }
 
@@ -154,7 +163,7 @@ public class HomeFragment extends Fragment {
                 clearTags.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        currentUser.getTags().clear();
+                        signedUser.getTags().clear();
                         tagOutput.setText("");
                     }
                 });
@@ -164,9 +173,8 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         if(addTagInput.getText().equals("")) {
-
                         } else {
-                            currentUser.getTags().add(addTagInput.getText().toString().toLowerCase());
+                            signedUser.getTags().add(addTagInput.getText().toString().toLowerCase());
                             addTagInput.setText("");
                             createTagsString(tagOutput);
                         }
@@ -185,13 +193,14 @@ public class HomeFragment extends Fragment {
                 saveProfileBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        currentUser.setDisplayName(editUsername.getText().toString());
+                        signedUser.setDisplayName(editUsername.getText().toString());
+                        signedUser.setUid(signedUserUid);
                         firestore.collection("Profiles")
-                                .document(currentUserUid)
-                                .set(currentUser);
+                                .document(signedUserUid)
+                                .set(signedUser);
                         Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_LONG);
                         editProfileDialog.cancel();
-                        viewTxtUsername.setText(currentUser.getDisplayName());
+                        viewTxtUsername.setText(signedUser.getDisplayName());
                         createTagsString(viewTxtTags);
                     }
                 });
@@ -202,7 +211,7 @@ public class HomeFragment extends Fragment {
     private void createTagsString(TextView output) {
         output.setText("");
         StringBuilder tagList = new StringBuilder();
-        for (String tag : currentUser.getTags()) {
+        for (String tag : signedUser.getTags()) {
             tagList.append("#").append(tag).append(" ");
         }
         if(tagList.equals("")){

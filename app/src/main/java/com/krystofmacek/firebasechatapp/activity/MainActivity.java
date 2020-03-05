@@ -4,12 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentFactory;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
-import android.graphics.BlendMode;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,11 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.fragments.ChatsFragment;
 import com.krystofmacek.firebasechatapp.fragments.FriendsFragment;
@@ -33,12 +26,12 @@ import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final ArrayList<String> tags =
+    private final ArrayList<String> navigationLabels =
             new ArrayList<>(Arrays.asList("home", "chats", "search", "friends"));
 
     private TextView heading;
     private BottomNavigationView botNavigation;
-    FrameLayout frameLayout;
+    private FrameLayout frameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,28 +65,28 @@ public class MainActivity extends AppCompatActivity {
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 switch (item.getItemId()) {
                     case R.id.nav_item_home:
-                        ft.replace(R.id.fragment_container, new HomeFragment(), tags.get(0));
+                        ft.replace(R.id.fragment_container, new HomeFragment(), navigationLabels.get(0));
                         item.setChecked(true);
                         ft.addToBackStack("home");
                         ft.commit();
                         heading.setText("Profile");
                         break;
                     case R.id.nav_item_chats:
-                        ft.replace(R.id.fragment_container, new ChatsFragment(), tags.get(1));
+                        ft.replace(R.id.fragment_container, new ChatsFragment(), navigationLabels.get(1));
                         item.setChecked(true);
                         ft.addToBackStack("chats");
                         ft.commit();
                         heading.setText("Chats");
                         break;
                     case R.id.nav_item_search:
-                        ft.replace(R.id.fragment_container, new SearchFragment(), tags.get(2));
+                        ft.replace(R.id.fragment_container, new SearchFragment(), navigationLabels.get(2));
                         item.setChecked(true);
                         ft.addToBackStack("search");
                         ft.commit();
                         heading.setText("Search");
                         break;
                     case R.id.nav_item_friends:
-                        ft.replace(R.id.fragment_container, new FriendsFragment(), tags.get(3));
+                        ft.replace(R.id.fragment_container, new FriendsFragment(), navigationLabels.get(3));
                         item.setChecked(true);
                         ft.addToBackStack("friends");
                         ft.commit();
@@ -141,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         Fragment currentFragment;
-        for (String tag: tags) {
+        for (String tag: navigationLabels) {
             currentFragment = getSupportFragmentManager().findFragmentByTag(tag);
             if(currentFragment != null) {
                 if(currentFragment.isVisible()) {

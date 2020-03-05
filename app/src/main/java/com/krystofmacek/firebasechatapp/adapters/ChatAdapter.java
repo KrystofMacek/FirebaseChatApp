@@ -1,6 +1,7 @@
 package com.krystofmacek.firebasechatapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +15,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.core.OrderBy;
 import com.krystofmacek.firebasechatapp.R;
+import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.Message;
+import com.krystofmacek.firebasechatapp.model.User;
 
 import java.util.List;
 
@@ -46,12 +51,29 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ChatAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ChatAdapter.ViewHolder holder, int position) {
         final Chat chat = chats.get(position);
-        String username = chat.getOtherMember(signedUser.getUid());
-        holder.username.setText(username);
+        //here im getting ID not the username NEED TO FIX
+        String userId = chat.getOtherMember(signedUser.getUid());
+        FirebaseFirestore.getInstance().collection("Profiles")
+                .document(userId)
+                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                holder.username.setText(documentSnapshot.toObject(User.class).getDisplayName());
+            }
+        });
 
         getLastMessage(holder.lastMessage, chat);
+
+        holder.itemView.findViewById(R.id.item_chat_btnStartChat).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MessagingActivity.class);
+                intent.putExtra("userid", chat.getOtherMember(signedUser.getUid()));
+                context.startActivity(intent);
+            }
+        });
 
     }
 
@@ -60,7 +82,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         FirebaseFirestore.getInstance()
                 .collection("Chats")
                 .document(chat.getUid())
-                .collection("Messages").orderBy("timestamp")
+                .collection("Messages").orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(1)
                 .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -101,4 +123,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
             item_chat_btnStartChat = itemView.findViewById(R.id.item_chat_btnStartChat);
         }
     }
+
+
 }

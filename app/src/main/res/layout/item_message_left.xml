@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorWhite"
+    android:theme="@style/Theme.MaterialComponents.Light"
     android:padding="10dp">
 
     <com.google.android.material.card.MaterialCardView
@@ -14,13 +15,16 @@
         >
 
         <TextView
+
+            android:id="@+id/show_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="messageText"
             android:textSize="16dp"
             android:padding="10dp"
-            android:textColor="@color/colorBlack"
-            android:background="@drawable/message_background_left"/>
+
+            android:background="@drawable/message_background_left"
+            android:textColor="@color/colorBlack"/>
 
     </com.google.android.material.card.MaterialCardView>
 

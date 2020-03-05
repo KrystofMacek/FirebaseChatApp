@@ -1,6 +1,7 @@
 package com.krystofmacek.firebasechatapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
+import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.Message;
 import com.krystofmacek.firebasechatapp.model.User;
@@ -51,6 +53,15 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         holder.username.setText(username);
 
         getLastMessage(holder.lastMessage, profile.getUid());
+
+        holder.itemView.findViewById(R.id.item_friend_btnStartChat).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MessagingActivity.class);
+                intent.putExtra("userid", profile.getUid());
+                context.startActivity(intent);
+            }
+        });
 
     }
 

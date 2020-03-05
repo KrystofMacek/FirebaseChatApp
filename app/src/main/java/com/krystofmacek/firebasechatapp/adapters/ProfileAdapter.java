@@ -1,12 +1,14 @@
 package com.krystofmacek.firebasechatapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import com.krystofmacek.firebasechatapp.R;
+import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.User;
 
 import java.util.List;
@@ -37,6 +39,15 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
         String username = profile.getDisplayName();
         holder.username.setText(username);
         createTagsString(holder.tags, profile);
+
+        holder.itemView.findViewById(R.id.item_profile_btnStartChat).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MessagingActivity.class);
+                intent.putExtra("userid", profile.getUid());
+                context.startActivity(intent);
+            }
+        });
     }
 
     private void createTagsString(TextView output, User profile) {
