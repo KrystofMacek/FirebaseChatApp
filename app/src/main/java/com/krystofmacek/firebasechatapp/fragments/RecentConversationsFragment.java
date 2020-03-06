@@ -12,6 +12,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.ChatAdapter;
@@ -49,7 +50,7 @@ public class RecentConversationsFragment extends Fragment {
 
 
     private void loadRecentChats() {
-        final List<Chat> chats = new ArrayList<>();
+        final List<Chat> recentChats = new ArrayList<>();
 
         firestore.collection("Profiles").document(signedUser.getUid())
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -61,15 +62,15 @@ public class RecentConversationsFragment extends Fragment {
                     // Pridan custom index ve fristore
                     firestore.collection("Chats")
                             .whereIn("uid", chatIds)
-                            .orderBy("lastMessageTime")
+                            .orderBy("lastMessageTime", Query.Direction.DESCENDING)
                             .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                 @Override
                                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
-                                    for(Chat chat : queryDocumentSnapshots.toObjects(Chat.class)) {
-                                        chats.add(chat);
+                                    if(queryDocumentSnapshots != null) {
+                                        recentChats.addAll(queryDocumentSnapshots.toObjects(Chat.class));
                                     }
-                                    ChatAdapter adapter = new ChatAdapter(getContext(), chats);
+                                    ChatAdapter adapter = new ChatAdapter(getContext(), recentChats);
                                     LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
                                     layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
                                     recentChatRecycler.setLayoutManager(layoutManager);
@@ -82,4 +83,5 @@ public class RecentConversationsFragment extends Fragment {
 
     }
 
+    //TODO: on back pressed z messaging activity do recent chats - recycler zobrazuje chat 2x (refresh)
 }
