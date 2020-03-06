@@ -197,31 +197,29 @@ public class SearchFragment extends Fragment {
                 User user = documentSnapshot.toObject(User.class);
                 if(user != null && user.getTags() != null) {
 
-                    profilesCollectionRef
+                    FirebaseFirestore.getInstance()
+                            .collection("Profiles")
                             .whereEqualTo(locationField, locationOutput.getText().toString())
                             .whereArrayContainsAny("tags", user.getTags())
                             .limit(50)
                             .get()
-                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                            for(DocumentSnapshot profile : queryDocumentSnapshots.getDocuments()) {
-                                if(!profile.getId().equals(signedUser.getUid())) {
-                                    profiles.add(profile.toObject(User.class));
+                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(DocumentSnapshot profile : queryDocumentSnapshots.getDocuments()) {
+                                    if(!profile.getId().equals(signedUser.getUid())) {
+                                        profiles.add(profile.toObject(User.class));
+                                    }
                                 }
+                                ProfileAdapter adapter = new ProfileAdapter(getContext(), profiles);
+
+                                LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+                                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                                profileRecycler.setLayoutManager(layoutManager);
+                                profileRecycler.setAdapter(adapter);
                             }
 
-                            ProfileAdapter adapter = new ProfileAdapter(getContext(), profiles);
-
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                            profileRecycler.setLayoutManager(layoutManager);
-                            profileRecycler.setAdapter(adapter);
-                        }
-
-                    });
-
+                        });
                 }
             }
         });
