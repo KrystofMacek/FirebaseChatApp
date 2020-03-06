@@ -17,6 +17,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
@@ -158,6 +159,9 @@ public class MessagingActivity extends AppCompatActivity {
                             );
                             firestore.collection("Chats").document(newId)
                                     .set(chat);
+                            firestore.collection("Profiles").document(signedUser.getUid())
+                                    .update("activeChats", FieldValue.arrayUnion(newId));
+
                             sendMessageSetup(chatId);
                         }
                     }

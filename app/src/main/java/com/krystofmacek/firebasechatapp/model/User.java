@@ -13,16 +13,18 @@ public class User {
     private Map<String, String> location;
     private List<String> tags = new ArrayList<>();
     private List<String> friends = new ArrayList<>();
+    private List<String> activeChats = new ArrayList<>();
 
     public User() {
     }
 
-    public User(String uid, String displayName, Map<String, String> location, List<String> tags, List<String> friends) {
+    public User(String uid, String displayName, Map<String, String> location, List<String> tags, List<String> friends, List<String> activeChats) {
         this.uid = uid;
         this.displayName = displayName;
         this.location = location;
         this.tags = tags;
         this.friends = friends;
+        this.activeChats = activeChats;
     }
 
 
@@ -64,5 +66,13 @@ public class User {
 
     public void setFriends(List<String> friends) {
         this.friends = friends;
+    }
+
+    public List<String> getActiveChats() {
+        return activeChats;
+    }
+
+    public void setActiveChats(List<String> activeChats) {
+        this.activeChats = activeChats;
     }
 }
