@@ -1,15 +1,19 @@
 package com.krystofmacek.firebasechatapp.activity;
 
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,6 +34,7 @@ import com.krystofmacek.firebasechatapp.model.User;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,6 +49,7 @@ public class MessagingActivity extends AppCompatActivity {
     private EditText inputMessageText;
     private RecyclerView messageRecycler;
     private TextView heading;
+    private ImageButton addFriendButton;
 
     private FirebaseFirestore firestore;
     private FirebaseUser signedUser;
@@ -60,6 +66,7 @@ public class MessagingActivity extends AppCompatActivity {
         sendMsgBtn = findViewById(R.id.messaging_btnSend);
         inputMessageText = findViewById(R.id.messaging_inputMessage);
         messageRecycler = findViewById(R.id.messaging_recycler);
+        addFriendButton = findViewById(R.id.messaging_addFriendButton);
 
         firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -68,6 +75,7 @@ public class MessagingActivity extends AppCompatActivity {
 
         setupTopBar(userId);
         loadMessages(userId);
+        setupAddFriend(userId);
 
     }
 
@@ -114,33 +122,23 @@ public class MessagingActivity extends AppCompatActivity {
                                             .update("activeChats", FieldValue.arrayUnion(chatId));
                                     // na kolekci Messages pripojime snapshot listener
                                     // ktery sleduje zmeny provedene v teto kolekci - pridani dokumentu msg
-                                    //TODO: tohle je divny <<< on event
                                     firestore.collection("Chats")
                                             .document(chatId)
                                             .collection("Messages")
+                                            .orderBy("timestamp", Query.Direction.ASCENDING)
                                             .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                                 @Override
                                                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                                                    firestore.collection("Chats")
-                                                            .document(chatId)
-                                                            .collection("Messages")
-                                                            .orderBy("timestamp")
-                                                            .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                                            if(queryDocumentSnapshots != null && queryDocumentSnapshots.getDocuments().size() > 0) {
-                                                                for (DocumentSnapshot snap : queryDocumentSnapshots.getDocuments()) {
-                                                                    messages.add(snap.toObject(Message.class));
-                                                                }
-                                                                adapter = new MessageAdapter(getApplicationContext(), messages);
-                                                                LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+                                                    if(queryDocumentSnapshots != null) {
+                                                        List<Message> messagesList = queryDocumentSnapshots.toObjects(Message.class);
+                                                        adapter = new MessageAdapter(getApplicationContext(), messagesList);
+                                                        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
                                                                 layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
                                                                 messageRecycler.setLayoutManager(layoutManager);
                                                                 messageRecycler.setAdapter(adapter);
-                                                                messageRecycler.scrollToPosition(messages.size()-1);
-                                                            }
-                                                        }
-                                                    });
+                                                                messageRecycler.scrollToPosition(messagesList.size()-1);
+                                                    }
+//
                                                 }
                                             });
                                     sendMessageSetup(chatId);
@@ -173,14 +171,15 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void sendMessageSetup(final String chatId){
-        final DocumentReference newMessageDoc = firestore.collection("Chats")
-                .document(chatId)
-                .collection("Messages")
-                .document();
-
         sendMsgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                final DocumentReference newMessageDoc = firestore.collection("Chats")
+                        .document(chatId)
+                        .collection("Messages")
+                        .document();
+
                 Message newMessage = new Message(signedUser.getUid(), inputMessageText.getText().toString(), Timestamp.now());
                 newMessageDoc.set(newMessage);
                 inputMessageText.setText("");
@@ -191,6 +190,44 @@ public class MessagingActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void setupAddFriend(final String userId) {
+
+        addFriendButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        final Dialog confirmFriendDialog = new Dialog(MessagingActivity.this);
+                        confirmFriendDialog.setTitle("Edit your profile");
+                        confirmFriendDialog.setContentView(R.layout.dialog_add_friend);
+                        confirmFriendDialog.show();
+
+                        Button add = confirmFriendDialog.findViewById(R.id.dialog_friend_add);
+                        Button cancel = confirmFriendDialog.findViewById(R.id.dialog_friend_cancel);
+
+                        add.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                firestore.collection("Profiles")
+                                        .document(signedUser.getUid())
+                                        .update("friends", FieldValue.arrayUnion(userId));
+                                confirmFriendDialog.cancel();
+                            }
+                        });
+
+                        cancel.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                confirmFriendDialog.cancel();
+                            }
+                        });
+
+                    }
+                }
+        );
+
     }
 
     @Override

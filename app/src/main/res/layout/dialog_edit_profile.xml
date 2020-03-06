@@ -13,37 +13,43 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:padding="15dp"
+        android:padding="20dp"
         android:hint="Username"/>
 
-
-<!--    <LinearLayout-->
-<!--        android:id="@+id/dialog_tagHolder"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical"-->
-<!--        android:padding="10dp"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/dialog_username">-->
-
-<!--    </LinearLayout>-->
-
-    <TextView
-        android:padding="10dp"
-        android:textSize="18dp"
+    <LinearLayout
+        android:id="@+id/linearLayout8"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/dialog_tagList"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_username"/>
+        android:orientation="horizontal"
+        android:padding="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_username">
+
+        <TextView
+            android:id="@+id/dialog_tagList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="10dp"
+            android:textSize="18dp" />
+
+        <Button
+            android:id="@+id/dialog_btnClearTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:background="@color/colorPrimary"
+            android:text="Clear" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_tagList"
-        android:padding="10dp">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout8">
 
 
         <EditText
@@ -51,50 +57,45 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="New Tag"/>
+            android:hint="New Tag" />
 
         <Button
             android:id="@+id/dialog_btnAddTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
             android:layout_marginRight="10dp"
-            android:text="Add" />
-        <Button
-            android:id="@+id/dialog_btnClearTag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            android:text="Clear" />
+            android:text="Add" />
 
 
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout7"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
         android:gravity="center"
-        android:padding="10dp">
+        android:orientation="horizontal"
+        android:padding="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
 
         <Button
             android:id="@+id/dialog_btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
             android:background="@color/colorPrimary"
             android:padding="10dp"
-            android:text="save profile"
-            android:layout_marginRight="10dp"/>
+            android:text="save profile" />
 
         <Button
             android:id="@+id/dialog_btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
             android:background="@color/colorPrimary"
             android:padding="10dp"
-            android:text="Cancel"
-            android:layout_marginLeft="10dp"/>
+            android:text="Cancel" />
     </LinearLayout>
 
 
