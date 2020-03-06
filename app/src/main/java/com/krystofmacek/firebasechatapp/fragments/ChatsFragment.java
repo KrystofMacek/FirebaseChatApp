@@ -37,6 +37,7 @@ public class ChatsFragment extends Fragment {
                 new ViewPagerAdapter(getChildFragmentManager(),
                         FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
+        adapter.addFragment(new NewConversationsFragment(), "New");
         adapter.addFragment(new RecentConversationsFragment(), "Recent");
         viewPager.setAdapter(adapter);
 

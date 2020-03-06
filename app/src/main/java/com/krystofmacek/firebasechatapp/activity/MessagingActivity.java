@@ -95,9 +95,6 @@ public class MessagingActivity extends AppCompatActivity {
 
     private void loadMessages(final String userId){
         final List<Message> messages = new ArrayList<>();
-
-
-
         // nejdrive najdeme chat
         firestore.collection("Chats")
                 .whereArrayContains("members", userId)
@@ -112,8 +109,12 @@ public class MessagingActivity extends AppCompatActivity {
                                 chatId = chat.getUid();
                                 newChat = false;
                                 if(chatId != null) {
+                                    //pridame mezi actvieChaty pokud je neobsahuje
+                                    firestore.collection("Profiles").document(signedUser.getUid())
+                                            .update("activeChats", FieldValue.arrayUnion(chatId));
                                     // na kolekci Messages pripojime snapshot listener
                                     // ktery sleduje zmeny provedene v teto kolekci - pridani dokumentu msg
+                                    //TODO: tohle je divny <<< on event
                                     firestore.collection("Chats")
                                             .document(chatId)
                                             .collection("Messages")
@@ -147,6 +148,8 @@ public class MessagingActivity extends AppCompatActivity {
 
                             }
                         }
+                        // zalozime novy chat
+
                         if(newChat) {
                             DocumentReference ref = firestore.collection("Chats").document();
                             String newId = ref.getId();
@@ -159,6 +162,7 @@ public class MessagingActivity extends AppCompatActivity {
                             );
                             firestore.collection("Chats").document(newId)
                                     .set(chat);
+
                             firestore.collection("Profiles").document(signedUser.getUid())
                                     .update("activeChats", FieldValue.arrayUnion(newId));
 

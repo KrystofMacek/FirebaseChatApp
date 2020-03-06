@@ -83,6 +83,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void requestLocation() {
+        //TODO: nacist location z firestoru pokud neziskame aktualni
         //Kontrola opravneni pro ziskani lokace
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
