@@ -210,7 +210,7 @@ public class SearchFragment extends Fragment {
         currentProfileRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(final DocumentSnapshot documentSnapshot) {
-                User user = documentSnapshot.toObject(User.class);
+                final User user = documentSnapshot.toObject(User.class);
                 if(user != null && user.getTags() != null) {
 
                     FirebaseFirestore.getInstance()
@@ -223,8 +223,10 @@ public class SearchFragment extends Fragment {
                             @Override
                             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                                 for(DocumentSnapshot profile : queryDocumentSnapshots.getDocuments()) {
-                                    if(!profile.getId().equals(signedUser.getUid())) {
-                                        profiles.add(profile.toObject(User.class));
+                                    User u = profile.toObject(User.class);
+                                    if(!profile.getId().equals(signedUser.getUid()) &&
+                                        !user.getFriends().contains(u.getUid())) {
+                                        profiles.add(u);
                                     }
                                 }
                                 ProfileAdapter adapter = new ProfileAdapter(getContext(), profiles);

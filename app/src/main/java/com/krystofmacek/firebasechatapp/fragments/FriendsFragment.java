@@ -14,6 +14,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.FriendAdapter;
@@ -65,24 +66,26 @@ public class FriendsFragment extends Fragment {
                             ids.clear();
                             User user = documentSnapshot.toObject(User.class);
                             ids.addAll(user.getFriends());
-                            // TODO: add order by (ideally by latest msg)
-                            firestore.collection("Profiles")
-                                    .whereIn("uid", ids)
-                                    .get()
-                                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                            friendsList.clear();
-                                            friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
+                            if(ids.size() > 0) {
+                                firestore.collection("Profiles")
+                                        .whereIn("uid", ids)
+                                        .orderBy("displayName", Query.Direction.ASCENDING)
+                                        .get()
+                                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                                friendsList.clear();
+                                                friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
 
-                                            FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
+                                                FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
 
-                                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                                            recyclerFriends.setLayoutManager(layoutManager);
-                                            recyclerFriends.setAdapter(adapter);
-                                        }
-                                    });
+                                                LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+                                                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                                                recyclerFriends.setLayoutManager(layoutManager);
+                                                recyclerFriends.setAdapter(adapter);
+                                            }
+                                        });
+                            }
                         }
 
                 });

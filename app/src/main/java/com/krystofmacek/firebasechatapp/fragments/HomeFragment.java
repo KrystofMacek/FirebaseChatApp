@@ -182,7 +182,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         if(!addTagInput.getText().toString().equals("")) {
-                            signedUser.getTags().add(addTagInput.getText().toString().toLowerCase());
+                            signedUser.getTags().add(addTagInput.getText().toString().toLowerCase().replaceAll("\\s",""));
                             addTagInput.setText("");
                             createTagsString(tagOutput);
                         }
