@@ -93,4 +93,10 @@ public class NewConversationsFragment extends Fragment {
 
 
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadNewChats();
+    }
 }

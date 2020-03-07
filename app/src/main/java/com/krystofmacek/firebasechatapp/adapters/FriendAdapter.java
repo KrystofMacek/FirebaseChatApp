@@ -1,10 +1,12 @@
 package com.krystofmacek.firebasechatapp.adapters;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -12,9 +14,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
+import com.krystofmacek.firebasechatapp.activity.MainActivity;
 import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.Message;
@@ -63,6 +67,38 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             }
         });
 
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                final Dialog removeFriendDialog = new Dialog(context);
+                removeFriendDialog.setContentView(R.layout.dialog_remove_friend);
+                removeFriendDialog.show();
+
+                Button remove = removeFriendDialog.findViewById(R.id.dialog_friend_remove);
+                Button cancel = removeFriendDialog.findViewById(R.id.dialog_friend_remove_cancel);
+
+                remove.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseFirestore.getInstance()
+                                .collection("Profiles")
+                                .document(signedUser.getUid())
+                                .update("friends", FieldValue.arrayRemove(profile.getUid()));
+                        removeFriendDialog.cancel();
+                    }
+                });
+
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        removeFriendDialog.cancel();
+                    }
+                });
+
+                return true;
+            }
+        });
+
     }
 
     @Override
@@ -83,6 +119,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             lastMessage = itemView.findViewById(R.id.item_friend_lastMessage);
             username = itemView.findViewById(R.id.item_friend_username);
             item_chat_btnStartChat = itemView.findViewById(R.id.item_friend_btnStartChat);
+
         }
     }
 

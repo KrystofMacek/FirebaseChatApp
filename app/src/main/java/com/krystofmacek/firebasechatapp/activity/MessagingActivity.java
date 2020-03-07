@@ -217,7 +217,6 @@ public class MessagingActivity extends AppCompatActivity {
                     public void onClick(View view) {
 
                         final Dialog confirmFriendDialog = new Dialog(MessagingActivity.this);
-                        confirmFriendDialog.setTitle("Edit your profile");
                         confirmFriendDialog.setContentView(R.layout.dialog_add_friend);
                         confirmFriendDialog.show();
 

@@ -84,5 +84,9 @@ public class RecentConversationsFragment extends Fragment {
 
     }
 
-    //TODO: on back pressed z messaging activity do recent chats - recycler zobrazuje chat 2x (refresh)
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadRecentChats();
+    }
 }

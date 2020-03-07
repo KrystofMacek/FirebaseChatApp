@@ -6,6 +6,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,7 +84,6 @@ public class SearchFragment extends Fragment {
     }
 
     private void requestLocation() {
-        //TODO: nacist location z firestoru pokud neziskame aktualni
         //Kontrola opravneni pro ziskani lokace
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -102,10 +102,11 @@ public class SearchFragment extends Fragment {
             locationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
+                    Address currentAddress;
                     if(location != null) {
                         Geocoder geocoder = new Geocoder(getContext());
                         try {
-                            Address currentAddress = geocoder.getFromLocation(
+                            currentAddress = geocoder.getFromLocation(
                                     location.getLatitude(),
                                     location.getLongitude(),
                                     1
@@ -123,6 +124,20 @@ public class SearchFragment extends Fragment {
 
                         } catch (IOException e) {
                             e.printStackTrace();
+                        }
+                    } else {
+                        firestore.collection("Profiles")
+                                .document(signedUser.getUid())
+                                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                address = documentSnapshot.toObject(User.class).getLocation();
+                                locationOutput.setText(address.get("City"));
+                            }
+                        });
+
+                        if(locationOutput.getText().toString().equals("")) {
+                            locationOutput.setText("Couldn\'t get your location");
                         }
                     }
                 }
