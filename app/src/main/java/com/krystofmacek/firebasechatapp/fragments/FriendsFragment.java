@@ -63,6 +63,7 @@ public class FriendsFragment extends Fragment {
                         User user = documentSnapshot.toObject(User.class);
                         ids.addAll(user.getFriends());
 
+                        // TODO: add order by (ideally by latest msg)
                         firestore.collection("Profiles")
                                 .whereIn("uid", ids)
                                 .get()
@@ -78,39 +79,8 @@ public class FriendsFragment extends Fragment {
                                         recyclerFriends.setAdapter(adapter);
                                     }
                                 });
-
                     }
                 });
-
-//        firestore.collection("Profiles")
-//                .document(auth.getCurrentUser().getUid())
-//                .get()
-//                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                    @Override
-//                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                        User user = documentSnapshot.toObject(User.class);
-//                        if(user != null) {
-//                            ids.addAll(user.getFriends());
-//                            for(String id : ids) {
-//                                firestore.collection("Profiles")
-//                                        .document(id)
-//                                        .get()
-//                                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                                    @Override
-//                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                                        friendsList.add(documentSnapshot.toObject(User.class));
-//                                    }
-//                                });
-//                            }
-//
-//                            FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
-//                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-//                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-//                            recyclerFriends.setLayoutManager(layoutManager);
-//                            recyclerFriends.setAdapter(adapter);
-//                        }
-//                    }
-//                });
     }
 
 }

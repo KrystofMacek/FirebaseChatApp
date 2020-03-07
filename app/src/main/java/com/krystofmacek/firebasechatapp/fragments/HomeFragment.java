@@ -3,7 +3,6 @@ package com.krystofmacek.firebasechatapp.fragments;
 import android.app.Dialog;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.ChatAdapter;
@@ -30,6 +30,7 @@ import com.krystofmacek.firebasechatapp.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -63,7 +64,7 @@ public class HomeFragment extends Fragment {
 
         //firebase objects
         firestore = FirebaseFirestore.getInstance();
-        signedUserUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        signedUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
         loadUser();
         setupDialog();
@@ -77,6 +78,7 @@ public class HomeFragment extends Fragment {
         final List<Chat> chats = new ArrayList<>();
         firestore.collection("Chats")
                 .whereArrayContains("members", signedUserUid)
+                .orderBy("lastMessageTime", Query.Direction.DESCENDING)
                 .limit(5)
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -112,10 +114,12 @@ public class HomeFragment extends Fragment {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot.exists()){
                     signedUser = documentSnapshot.toObject(User.class);
-                    if(signedUser.getDisplayName().equals("") || signedUser.getDisplayName() == null) {
-                        viewTxtUsername.setText("Please setup your profile");
-                    } else {
-                        viewTxtUsername.setText(signedUser.getDisplayName());
+                    if (signedUser != null) {
+                        if(signedUser.getDisplayName() == null || signedUser.getDisplayName().equals("")) {
+                            viewTxtUsername.setText("Please setup your profile");
+                        } else {
+                            viewTxtUsername.setText(signedUser.getDisplayName());
+                        }
                     }
                     createTagsString(viewTxtTags);
                 }
@@ -128,14 +132,14 @@ public class HomeFragment extends Fragment {
         viewBtnEditProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final Dialog editProfileDialog = new Dialog(getContext());
+                final Dialog editProfileDialog = new Dialog(Objects.requireNonNull(getContext()));
                 editProfileDialog.setTitle("Edit your profile");
                 editProfileDialog.setContentView(R.layout.dialog_edit_profile);
 
                 //Nastaveni velikosti dialogu
                 Window window = editProfileDialog.getWindow();
                 Point size = new Point();
-                Display display = window.getWindowManager().getDefaultDisplay();
+                Display display = Objects.requireNonNull(window).getWindowManager().getDefaultDisplay();
                 display.getSize(size);
                 int width = size.x;
                 window.setLayout((int) (width * 0.90), WindowManager.LayoutParams.WRAP_CONTENT);
@@ -177,8 +181,7 @@ public class HomeFragment extends Fragment {
                 addTagBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(addTagInput.getText().equals("")) {
-                        } else {
+                        if(!addTagInput.getText().toString().equals("")) {
                             signedUser.getTags().add(addTagInput.getText().toString().toLowerCase());
                             addTagInput.setText("");
                             createTagsString(tagOutput);
@@ -203,7 +206,7 @@ public class HomeFragment extends Fragment {
                         firestore.collection("Profiles")
                                 .document(signedUserUid)
                                 .set(signedUser);
-                        Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_LONG);
+                        Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_LONG).show();
                         editProfileDialog.cancel();
                         viewTxtUsername.setText(signedUser.getDisplayName());
                         createTagsString(viewTxtTags);
@@ -219,7 +222,7 @@ public class HomeFragment extends Fragment {
         for (String tag : signedUser.getTags()) {
             tagList.append("#").append(tag).append(" ");
         }
-        if(tagList.equals("")){
+        if(tagList.toString().equals("")){
             output.setText("No tags specified");
         } else {
             output.setText(tagList);

@@ -21,6 +21,7 @@ import com.krystofmacek.firebasechatapp.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -56,8 +57,8 @@ public class RecentConversationsFragment extends Fragment {
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                User u = documentSnapshot.toObject(User.class);
-                List<String> chatIds = u.getActiveChats();
+                User user = documentSnapshot.toObject(User.class);
+                List<String> chatIds = Objects.requireNonNull(user).getActiveChats();
                 if(!chatIds.isEmpty()){
                     // Pridan custom index ve fristore
                     firestore.collection("Chats")
