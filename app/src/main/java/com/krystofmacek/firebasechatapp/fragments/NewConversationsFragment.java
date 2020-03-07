@@ -39,6 +39,7 @@ public class NewConversationsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_new_conversations, container, false);
 
+        // inicializce ui a fireb obj
         firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
         newChatRecycler = view.findViewById(R.id.fChats_New_recycler);
@@ -51,6 +52,7 @@ public class NewConversationsFragment extends Fragment {
     private void loadNewChats() {
         final List<Chat> newChats = new ArrayList<>();
 
+        // nacteme seznam aktivnich chatu
         firestore.collection("Profiles").document(signedUser.getUid())
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -58,6 +60,7 @@ public class NewConversationsFragment extends Fragment {
                 final List<String> activeChats =
                         documentSnapshot.toObject(User.class).getActiveChats();
 
+                // nacteme vsechny chaty ve kterych je uzivatel clenem
                 firestore.collection("Chats")
                         .whereArrayContains("members", signedUser.getUid())
                         .orderBy("lastMessageTime")
@@ -65,22 +68,20 @@ public class NewConversationsFragment extends Fragment {
                             @Override
                             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                                 List<Chat> allChats = queryDocumentSnapshots.toObjects(Chat.class);
-
+                                // zjistime ktere z nactenych jsou nove
                                 for(Chat c : allChats) {
                                     boolean isNewChat = true;
-
                                     for(String activeChatId : activeChats) {
                                         if(c.getUid().equals(activeChatId)) {
                                             isNewChat = false;
                                         }
                                     }
+                                    // nove pridame do seznamu
                                     if(isNewChat) {
                                         newChats.add(c);
                                     }
-
                                 }
-
-
+                                // zobrazime seznam novych chatu
                                 ChatAdapter adapter = new ChatAdapter(getContext(), newChats);
                                 LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
                                 layoutManager.setOrientation(LinearLayoutManager.VERTICAL);

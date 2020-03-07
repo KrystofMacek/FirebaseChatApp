@@ -49,6 +49,22 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         return new FriendAdapter.ViewHolder(view);
     }
 
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
+        TextView lastMessage;
+        TextView username;
+        ImageButton item_chat_btnStartChat;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            lastMessage = itemView.findViewById(R.id.item_friend_lastMessage);
+            username = itemView.findViewById(R.id.item_friend_username);
+            item_chat_btnStartChat = itemView.findViewById(R.id.item_friend_btnStartChat);
+
+        }
+    }
+
     @Override
     public void onBindViewHolder(@NonNull FriendAdapter.ViewHolder holder, int position) {
 
@@ -106,22 +122,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         return profiles.size();
     }
 
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
-        TextView lastMessage;
-        TextView username;
-        ImageButton item_chat_btnStartChat;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-
-            lastMessage = itemView.findViewById(R.id.item_friend_lastMessage);
-            username = itemView.findViewById(R.id.item_friend_username);
-            item_chat_btnStartChat = itemView.findViewById(R.id.item_friend_btnStartChat);
-
-        }
-    }
 
     private void getLastMessage(final TextView lastMessageView, final String friendId) {
         // Najdeme odpovidajici Chat

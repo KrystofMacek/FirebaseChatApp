@@ -65,15 +65,18 @@ public class MessagingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
+        //inicializace ui elementu
         sendMsgBtn = findViewById(R.id.messaging_btnSend);
         inputMessageText = findViewById(R.id.messaging_inputMessage);
         messageRecycler = findViewById(R.id.messaging_recycler);
         addFriendButton = findViewById(R.id.messaging_addFriendButton);
         addFriendBar = findViewById(R.id.messaging_addFriendBar);
 
+        //inicializace firestore a prihlaseneho uzivatele
         firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
 
+        // nacteni ID uzivatele s kterym komunikujeme
         userId = getIntent().getStringExtra("userid");
 
         setupTopBar(userId);
@@ -84,6 +87,7 @@ public class MessagingActivity extends AppCompatActivity {
 
     private void setupTopBar(String userId) {
         heading = findViewById(R.id.toolbar_heading);
+        // Nastaveni nadpisu na jmeno uzivatele
         firestore.collection("Profiles")
                 .document(userId)
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -105,8 +109,8 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void loadMessages(final String userId){
-        final List<Message> messages = new ArrayList<>();
-        // nejdrive najdeme chat
+
+        //Nacteni chatu daneho uzivatele
         firestore.collection("Chats")
                 .whereArrayContains("members", userId)
                 .get()
@@ -116,11 +120,12 @@ public class MessagingActivity extends AppCompatActivity {
                         boolean newChat = true;
                         for(DocumentSnapshot snap : queryDocumentSnapshots.getDocuments()) {
                             Chat chat = snap.toObject(Chat.class);
+                            // vyber chatu kde members obsahuje obe id
                             if(chat.getOtherMember(userId).equals(signedUser.getUid())) {
                                 chatId = chat.getUid();
                                 newChat = false;
                                 if(chatId != null) {
-                                    //pridame mezi actvieChaty pokud je neobsahuje
+                                    //chat pridame do seznamu aktivnich chatu prihlaseneho uzivatele
                                     firestore.collection("Profiles").document(signedUser.getUid())
                                             .update("activeChats", FieldValue.arrayUnion(chatId));
                                     // na kolekci Messages pripojime snapshot listener
@@ -133,7 +138,9 @@ public class MessagingActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                                                     if(queryDocumentSnapshots != null) {
+                                                        // vytvoreni listu vsech zprav, serazenych podle timestamp
                                                         List<Message> messagesList = queryDocumentSnapshots.toObjects(Message.class);
+                                                        // naplneni ui zpravami
                                                         adapter = new MessageAdapter(getApplicationContext(), messagesList);
                                                         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
                                                                 layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -144,13 +151,13 @@ public class MessagingActivity extends AppCompatActivity {
 //
                                                 }
                                             });
+
                                     sendMessageSetup(chatId);
                                 }
 
                             }
                         }
-                        // zalozime novy chat
-
+                        // pokud chat jeste neexistuje, vytvori se novy
                         if(newChat) {
                             DocumentReference ref = firestore.collection("Chats").document();
                             String newId = ref.getId();
@@ -164,6 +171,7 @@ public class MessagingActivity extends AppCompatActivity {
                             firestore.collection("Chats").document(newId)
                                     .set(chat);
 
+                            // pridame ho mezi aktivni chaty prihlaseneho uzivatele
                             firestore.collection("Profiles").document(signedUser.getUid())
                                     .update("activeChats", FieldValue.arrayUnion(newId));
 
@@ -173,20 +181,22 @@ public class MessagingActivity extends AppCompatActivity {
                 });
     }
 
+    // nastaveni tlacitka pro odeslani zpravy
     private void sendMessageSetup(final String chatId){
         sendMsgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                // vyvtoreni dokumentu nove zpravy
                 final DocumentReference newMessageDoc = firestore.collection("Chats")
                         .document(chatId)
                         .collection("Messages")
                         .document();
-
+                // Do dokumentu se ulozi objekt nove zpravy
                 Message newMessage = new Message(signedUser.getUid(), inputMessageText.getText().toString(), Timestamp.now());
                 newMessageDoc.set(newMessage);
                 inputMessageText.setText("");
 
+                // aktualizace casu posledni zpravy v dokumentu reprezentujiciho chat
                 firestore.collection("Chats")
                         .document(chatId)
                         .update("lastMessageTime", newMessage.getTimestamp());
@@ -196,7 +206,7 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void setupAddFriend(final String userId) {
-
+        // pokud je uzivatel v seznamu pratel, odstranime tlacitko pro pridani
         firestore.collection("Profiles")
                 .document(signedUser.getUid())
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -211,11 +221,13 @@ public class MessagingActivity extends AppCompatActivity {
             }
         });
 
+        //nastaveni onClick tlacitka pridavajiciho uzivatele mezi pratele
         addFriendButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
+                        // Vytvoreni dialogu pro potvrzeni pridani uzivatele
                         final Dialog confirmFriendDialog = new Dialog(MessagingActivity.this);
                         confirmFriendDialog.setContentView(R.layout.dialog_add_friend);
                         confirmFriendDialog.show();
@@ -223,6 +235,7 @@ public class MessagingActivity extends AppCompatActivity {
                         Button add = confirmFriendDialog.findViewById(R.id.dialog_friend_add);
                         Button cancel = confirmFriendDialog.findViewById(R.id.dialog_friend_cancel);
 
+                        // po potvrzeni ho pridame
                         add.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {

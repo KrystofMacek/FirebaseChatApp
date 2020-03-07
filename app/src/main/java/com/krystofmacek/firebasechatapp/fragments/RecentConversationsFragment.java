@@ -30,9 +30,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class RecentConversationsFragment extends Fragment {
 
-    FirebaseFirestore firestore;
-    FirebaseUser signedUser;
-    RecyclerView recentChatRecycler;
+    private FirebaseFirestore firestore;
+    private FirebaseUser signedUser;
+    private RecyclerView recentChatRecycler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -40,6 +40,7 @@ public class RecentConversationsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recent_conversations, container, false);
 
+        // inicializace firebase obj a UI
         firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
         recentChatRecycler = view.findViewById(R.id.fChats_Recent_recycler);
@@ -52,7 +53,7 @@ public class RecentConversationsFragment extends Fragment {
 
     private void loadRecentChats() {
         final List<Chat> recentChats = new ArrayList<>();
-
+        // Nacteni dokumentu uzivatele
         firestore.collection("Profiles").document(signedUser.getUid())
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -60,6 +61,7 @@ public class RecentConversationsFragment extends Fragment {
                 User user = documentSnapshot.toObject(User.class);
                 List<String> chatIds = Objects.requireNonNull(user).getActiveChats();
                 if(!chatIds.isEmpty()){
+                    // nacteme vsechny chaty, serazene podle casu posledni zpravy od nejnovejsich
                     // Pridan custom index ve fristore
                     firestore.collection("Chats")
                             .whereIn("uid", chatIds)
@@ -67,7 +69,6 @@ public class RecentConversationsFragment extends Fragment {
                             .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                 @Override
                                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-
                                     if(queryDocumentSnapshots != null) {
                                         recentChats.addAll(queryDocumentSnapshots.toObjects(Chat.class));
                                     }

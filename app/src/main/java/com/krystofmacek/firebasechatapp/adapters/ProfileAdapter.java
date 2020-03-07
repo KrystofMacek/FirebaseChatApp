@@ -49,6 +49,20 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
             }
         });
     }
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
+        TextView tags;
+        TextView username;
+        ImageButton item_chat_btnStartChat;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            tags = itemView.findViewById(R.id.item_profile_tags);
+            username = itemView.findViewById(R.id.item_profile_username);
+            item_chat_btnStartChat = itemView.findViewById(R.id.item_profile_btnStartChat);
+        }
+    }
 
     private void createTagsString(TextView output, User profile) {
         output.setText("");
@@ -65,18 +79,4 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
     }
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
-        TextView tags;
-        TextView username;
-        ImageButton item_chat_btnStartChat;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-
-            tags = itemView.findViewById(R.id.item_profile_tags);
-            username = itemView.findViewById(R.id.item_profile_username);
-            item_chat_btnStartChat = itemView.findViewById(R.id.item_profile_btnStartChat);
-        }
-    }
 }

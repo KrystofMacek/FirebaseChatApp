@@ -56,13 +56,13 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
 
-        // ui elements
+        // inicializace ui elemntu
         viewTxtUsername = view.findViewById(R.id.fHome_username);
         viewTxtTags = view.findViewById(R.id.fHome_tags);
         viewBtnEditProfile = view.findViewById(R.id.fHome_btnEditProfile);
         recyclerRecentChats = view.findViewById(R.id.fHome_recycler);
 
-        //firebase objects
+        //firebase objekty
         firestore = FirebaseFirestore.getInstance();
         signedUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
@@ -107,7 +107,6 @@ public class HomeFragment extends Fragment {
 
     // Nacteni dat o uzivateli
     private void loadUser() {
-
         signedUserProfileRef = firestore.collection("Profiles").document(signedUserUid);
         signedUserProfileRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -115,6 +114,7 @@ public class HomeFragment extends Fragment {
                 if(documentSnapshot.exists()){
                     signedUser = documentSnapshot.toObject(User.class);
                     if (signedUser != null) {
+                        // pokud nema uzivatel nastaveny profil
                         if(signedUser.getDisplayName() == null || signedUser.getDisplayName().equals("")) {
                             viewTxtUsername.setText("Please setup your profile");
                         } else {
@@ -132,6 +132,7 @@ public class HomeFragment extends Fragment {
         viewBtnEditProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // vytvoreni dialogu
                 final Dialog editProfileDialog = new Dialog(Objects.requireNonNull(getContext()));
                 editProfileDialog.setTitle("Edit your profile");
                 editProfileDialog.setContentView(R.layout.dialog_edit_profile);
@@ -168,7 +169,7 @@ public class HomeFragment extends Fragment {
                     createTagsString(tagOutput);
                 }
 
-                //Clear tag button listener
+                //Clear tag button listener - smazani tagu
                 clearTags.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -177,7 +178,7 @@ public class HomeFragment extends Fragment {
                     }
                 });
 
-                //Add Tag button listeners
+                //Add Tag button listeners - pridani tagu
                 addTagBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -198,6 +199,7 @@ public class HomeFragment extends Fragment {
                 });
 
                 //Save button listener
+                // aktualizace dokumentu profilu ve firestore
                 saveProfileBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -216,6 +218,8 @@ public class HomeFragment extends Fragment {
         });
 
     }
+
+    // metoda pro vypsani jednotlivych tagu do textView elementu
     private void createTagsString(TextView output) {
         output.setText("");
         StringBuilder tagList = new StringBuilder();

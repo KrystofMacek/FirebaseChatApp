@@ -22,6 +22,7 @@ public class ChatsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_chats, container, false);
 
 
+        // Inicializace viewPager a TabLayout pro zobrazovani ruznuch chat fragmentu
         ViewPager viewPager = view.findViewById(R.id.fChats_viewPager);
         setupViewPager(viewPager);
         TabLayout tabLayout = view.findViewById(R.id.fChats_tabLayout);
@@ -31,12 +32,14 @@ public class ChatsFragment extends Fragment {
         return view;
     }
 
+    //
     private void setupViewPager(ViewPager viewPager) {
 
         ViewPagerAdapter adapter =
                 new ViewPagerAdapter(getChildFragmentManager(),
                         FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
+        // Pridani fragmentu do adapteru
         adapter.addFragment(new NewConversationsFragment(), "New");
         adapter.addFragment(new RecentConversationsFragment(), "Recent");
         viewPager.setAdapter(adapter);

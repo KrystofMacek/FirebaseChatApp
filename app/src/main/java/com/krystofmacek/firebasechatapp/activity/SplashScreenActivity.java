@@ -20,17 +20,19 @@ public class SplashScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
+        //inicializace firestore a prihlaseneho uzivatele
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
         Intent intent;
 
+        // pokud neni nikdo prihlasen spusti se signUp aktivita
         if(user == null) {
             intent = new Intent(getApplicationContext(), SignupActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
-
+            // jinak se spusti main aktivita
         } else {
             intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

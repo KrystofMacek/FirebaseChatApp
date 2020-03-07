@@ -34,20 +34,17 @@ public class FriendsFragment extends Fragment {
 
     private RecyclerView recyclerFriends;
 
-    FirebaseFirestore firestore;
-    FirebaseAuth auth;
+    private FirebaseFirestore firestore;
+    private FirebaseAuth auth;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
-
         recyclerFriends = view.findViewById(R.id.fFriends_recycler);
-
+        // inicializace fireB objektu
         firestore = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
-
         loadFriendsList();
 
         return view;
@@ -58,34 +55,37 @@ public class FriendsFragment extends Fragment {
         final List<User> friendsList = new ArrayList<>();
         final List<String> ids = new ArrayList<>();
 
+        //nacteni seznamu pratel
         firestore.collection("Profiles")
                 .document(auth.getCurrentUser().getUid())
                 .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                     @Override
                     public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                            ids.clear();
-                            User user = documentSnapshot.toObject(User.class);
-                            ids.addAll(user.getFriends());
-                            if(ids.size() > 0) {
-                                firestore.collection("Profiles")
-                                        .whereIn("uid", ids)
-                                        .orderBy("displayName", Query.Direction.ASCENDING)
-                                        .get()
-                                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                                friendsList.clear();
-                                                friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
+                        // z dokumentu uzivatele nacteme seznam pratel
+                        ids.clear();
+                        User user = documentSnapshot.toObject(User.class);
+                        ids.addAll(user.getFriends());
+                        if(ids.size() > 0) {
+                            // z kolekce uzivatelu nacteme odpovidajici pratele
+                            // seradime podle abecendy
+                            firestore.collection("Profiles")
+                                    .whereIn("uid", ids)
+                                    .orderBy("displayName", Query.Direction.ASCENDING)
+                                    .get()
+                                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            friendsList.clear();
+                                            friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
 
-                                                FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
-
-                                                LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                                                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                                                recyclerFriends.setLayoutManager(layoutManager);
-                                                recyclerFriends.setAdapter(adapter);
-                                            }
-                                        });
-                            }
+                                            FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
+                                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+                                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                                            recyclerFriends.setLayoutManager(layoutManager);
+                                            recyclerFriends.setAdapter(adapter);
+                                        }
+                                    });
+                        }
                         }
 
                 });

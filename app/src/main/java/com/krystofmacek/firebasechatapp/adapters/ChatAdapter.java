@@ -34,8 +34,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     private Context context;
     private List<Chat> chats;
-    private String lastMsg;
-    FirebaseUser signedUser;
+    private FirebaseUser signedUser;
 
     public ChatAdapter(Context context, List<Chat> chats) {
         this.context = context;
@@ -46,15 +45,31 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     @NonNull
     @Override
     public ChatAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Definice ViewHolder layoutu - jeho vytvoreni
         View view = LayoutInflater.from(context).inflate(R.layout.item_chat, parent, false);
         return new ChatAdapter.ViewHolder(view);
     }
 
+    // Inicializace UI elementu
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        TextView lastMessage;
+        TextView username;
+        ImageButton item_chat_btnStartChat;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            lastMessage = itemView.findViewById(R.id.item_chat_lastMessage);
+            username = itemView.findViewById(R.id.item_chat_username);
+            item_chat_btnStartChat = itemView.findViewById(R.id.item_chat_btnStartChat);
+        }
+    }
+
+    // Napneni UI elementu
     @Override
     public void onBindViewHolder(@NonNull final ChatAdapter.ViewHolder holder, int position) {
         final Chat chat = chats.get(position);
-        //here im getting ID not the username NEED TO FIX
         String userId = chat.getOtherMember(signedUser.getUid());
+        // nacteni uzivatelskeho jmena
         FirebaseFirestore.getInstance().collection("Profiles")
                 .document(userId)
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -65,7 +80,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         });
 
         getLastMessage(holder.lastMessage, chat);
-
+        // nastaveni onClick pro spusteni aktivity chat
         holder.itemView.findViewById(R.id.item_chat_btnStartChat).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,8 +92,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     }
 
+    // nacteni posledni zpravy z chatu
     private void getLastMessage(final TextView lastMessageView, final Chat chat) {
-
         FirebaseFirestore.getInstance()
                 .collection("Chats")
                 .document(chat.getUid())
@@ -106,22 +121,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     @Override
     public int getItemCount() {
         return chats.size();
-    }
-
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
-         TextView lastMessage;
-         TextView username;
-         ImageButton item_chat_btnStartChat;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-
-            lastMessage = itemView.findViewById(R.id.item_chat_lastMessage);
-            username = itemView.findViewById(R.id.item_chat_username);
-            item_chat_btnStartChat = itemView.findViewById(R.id.item_chat_btnStartChat);
-        }
     }
 
 

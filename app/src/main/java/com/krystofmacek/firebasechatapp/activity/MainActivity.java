@@ -41,16 +41,14 @@ public class MainActivity extends AppCompatActivity {
         setupNavigation();
     }
 
+     // Metody poskytující navigaci mezi Aktivitami
+     // setupNavigation(), onCreateOptionsMenu(Menu menu), onOptionsItemSelected(@NonNull MenuItem item)
 
-    /**
-     Metody poskytující navigaci mezi Aktivitami
-     setupNavigation(), onCreateOptionsMenu(Menu menu), onOptionsItemSelected(@NonNull MenuItem item)
-     */
     private void setupNavigation() {
 
+        // Inicializace top action baru
         heading = findViewById(R.id.toolbar_heading);
         heading.setText("Profile");
-
         Toolbar toolbar = findViewById(R.id.toolbar_top);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
@@ -97,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // vychozi fragment -> Home
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_home);
         if(fragment == null || !fragment.isInLayout()) {
             FragmentTransaction ft =
@@ -106,14 +105,15 @@ public class MainActivity extends AppCompatActivity {
             botNavigation.setSelectedItemId(R.id.nav_item_home);
             ft.commit();
         }
-
-
     }
+
+    // options dropdown menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.top_bar_dropdown_menu, menu);
         return true;
     }
+    // dropdown menu vyber itemu
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -124,12 +124,14 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    //metoda pro odhlaseni uzivatele
     private void logout() {
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(MainActivity.this, SignupActivity.class));
         finish();
     }
 
+    // nastaveni navigace mezi fragmenty vuzitim BackButton
     @Override
     public void onBackPressed() {
         super.onBackPressed();

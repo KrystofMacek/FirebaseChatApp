@@ -46,6 +46,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     }
 
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
+        public TextView show_message;
+        public ViewHolder(View itemView) {
+            super(itemView);
+            show_message = itemView.findViewById(R.id.show_message);
+        }
+
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Message message = messages.get(position);
@@ -55,16 +65,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public int getItemCount() {
         return messages.size();
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
-        public TextView show_message;
-        public ViewHolder(View itemView) {
-            super(itemView);
-            show_message = itemView.findViewById(R.id.show_message);
-        }
-
     }
 
     @Override
