@@ -3,7 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/item_friend">
+    android:id="@+id/item_friend"
+    android:layout_marginTop="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,12 +34,13 @@
                 android:textSize="20dp"
                 android:paddingTop="10dp"
                 android:layout_weight="1"
+                android:textStyle="bold"
                 android:id="@+id/item_friend_username"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="#Tag1 #tag2 #tag3"
+                android:maxLines="1"
                 android:textSize="16dp"
                 android:paddingBottom="15dp"
                 android:id="@+id/item_friend_lastMessage"/>
@@ -49,7 +53,7 @@
             android:src="@drawable/ic_arrow"
             android:background="@color/colorPrimary"
             android:id="@+id/item_friend_btnStartChat"
-            android:tint="@color/colorWhite"/>
+            android:tint="@color/colorBlack"/>
 
     </LinearLayout>
 

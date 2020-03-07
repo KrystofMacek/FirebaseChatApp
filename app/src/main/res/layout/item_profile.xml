@@ -27,6 +27,7 @@
             android:layout_weight="1">
 
             <TextView
+                android:textStyle="bold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Username"
@@ -51,7 +52,7 @@
             android:src="@drawable/ic_arrow"
             android:background="@color/colorPrimary"
             android:id="@+id/item_profile_btnStartChat"
-            android:tint="@color/colorWhite"/>
+            android:tint="@color/colorBlack"/>
 
     </LinearLayout>
 

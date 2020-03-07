@@ -21,6 +21,7 @@
 
             <TextView
                 android:id="@+id/item_chat_username"
+                android:textStyle="bold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
@@ -30,6 +31,7 @@
                 android:id="@+id/item_chat_lastMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:maxLines="1"
                 android:padding="10dp"
                 android:textSize="14dp" />
 
