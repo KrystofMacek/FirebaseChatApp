@@ -83,6 +83,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
+
                         for (DocumentSnapshot chat: docs) {
                             chats.add(chat.toObject(Chat.class));
                         }

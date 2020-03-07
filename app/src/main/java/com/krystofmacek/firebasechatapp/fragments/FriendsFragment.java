@@ -1,6 +1,7 @@
 package com.krystofmacek.firebasechatapp.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.FriendAdapter;
 import com.krystofmacek.firebasechatapp.adapters.ProfileAdapter;
@@ -27,9 +29,9 @@ import androidx.recyclerview.widget.RecyclerView;
 public class FriendsFragment extends Fragment {
 
     private RecyclerView recyclerFriends;
-    private CollectionReference profilesCollectionRef;
-    private DocumentReference currentUserProfileRef;
 
+    FirebaseFirestore firestore;
+    FirebaseAuth auth;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -39,16 +41,8 @@ public class FriendsFragment extends Fragment {
 
         recyclerFriends = view.findViewById(R.id.fFriends_recycler);
 
-        profilesCollectionRef =
-                FirebaseFirestore
-                        .getInstance()
-                        .collection("Profiles");
-
-        currentUserProfileRef =
-                FirebaseFirestore
-                        .getInstance()
-                        .collection("Profiles")
-                        .document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        firestore = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         loadFriendsList();
 
@@ -58,34 +52,65 @@ public class FriendsFragment extends Fragment {
     private void loadFriendsList() {
 
         final List<User> friendsList = new ArrayList<>();
+        final List<String> ids = new ArrayList<>();
 
-        currentUserProfileRef.get()
+        firestore.collection("Profiles")
+                .document(auth.getCurrentUser().getUid())
+                .get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         User user = documentSnapshot.toObject(User.class);
-                        if(user != null) {
-                            List<String> ids = user.getFriends();
-                            for(String id : ids) {
-                                profilesCollectionRef
-                                        .document(id).get()
-                                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        ids.addAll(user.getFriends());
+
+                        firestore.collection("Profiles")
+                                .whereIn("uid", ids)
+                                .get()
+                                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                     @Override
-                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                        friendsList.add(documentSnapshot.toObject(User.class));
+                                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                        friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
+
+                                        FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
+                                        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+                                        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                                        recyclerFriends.setLayoutManager(layoutManager);
+                                        recyclerFriends.setAdapter(adapter);
                                     }
                                 });
-                            }
 
-                            FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
-
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                            recyclerFriends.setLayoutManager(layoutManager);
-                            recyclerFriends.setAdapter(adapter);
-                        }
                     }
                 });
+
+//        firestore.collection("Profiles")
+//                .document(auth.getCurrentUser().getUid())
+//                .get()
+//                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                    @Override
+//                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                        User user = documentSnapshot.toObject(User.class);
+//                        if(user != null) {
+//                            ids.addAll(user.getFriends());
+//                            for(String id : ids) {
+//                                firestore.collection("Profiles")
+//                                        .document(id)
+//                                        .get()
+//                                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                                    @Override
+//                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                                        friendsList.add(documentSnapshot.toObject(User.class));
+//                                    }
+//                                });
+//                            }
+//
+//                            FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
+//                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+//                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+//                            recyclerFriends.setLayoutManager(layoutManager);
+//                            recyclerFriends.setAdapter(adapter);
+//                        }
+//                    }
+//                });
     }
 
 }

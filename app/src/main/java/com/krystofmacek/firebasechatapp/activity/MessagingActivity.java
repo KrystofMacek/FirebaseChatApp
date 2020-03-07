@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -50,6 +51,7 @@ public class MessagingActivity extends AppCompatActivity {
     private RecyclerView messageRecycler;
     private TextView heading;
     private ImageButton addFriendButton;
+    private LinearLayout addFriendBar;
 
     private FirebaseFirestore firestore;
     private FirebaseUser signedUser;
@@ -67,6 +69,7 @@ public class MessagingActivity extends AppCompatActivity {
         inputMessageText = findViewById(R.id.messaging_inputMessage);
         messageRecycler = findViewById(R.id.messaging_recycler);
         addFriendButton = findViewById(R.id.messaging_addFriendButton);
+        addFriendBar = findViewById(R.id.messaging_addFriendBar);
 
         firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -193,6 +196,20 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void setupAddFriend(final String userId) {
+
+        firestore.collection("Profiles")
+                .document(signedUser.getUid())
+                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                List<String> friends = documentSnapshot.toObject(User.class).getFriends();
+                for(String f : friends) {
+                    if(userId.equals(f)) {
+                        addFriendBar.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
 
         addFriendButton.setOnClickListener(
                 new View.OnClickListener() {
