@@ -6,6 +6,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,14 +42,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import javax.security.auth.callback.Callback;
+
 public class SearchFragment extends Fragment {
 
-
+    private final static int ONE_MINUTE_INTERVAL = 60000;
     private RecyclerView profileRecycler;
     private TextView locationOutput;
     private Spinner spinner;
@@ -102,53 +111,87 @@ public class SearchFragment extends Fragment {
         } else {
             // Ziskani lokace
             locationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-            locationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            LocationRequest locationRequest = new LocationRequest();
+            locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+            locationRequest.setInterval(ONE_MINUTE_INTERVAL);
+            locationRequest.setFastestInterval(2000);
+            locationProviderClient.requestLocationUpdates(locationRequest, new LocationCallback() {
                 @Override
-                public void onSuccess(Location location) {
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    Location location = locationResult.getLastLocation();
+
+                    Log.i("Location", location.getLatitude() + " " + location.getLongitude());
+
                     Address currentAddress;
-                    if(location != null) {
-                        Geocoder geocoder = new Geocoder(getContext());
-                        try {
-                            // prevedeni souradnic na adresu
-                            currentAddress = geocoder.getFromLocation(
-                                    location.getLatitude(),
-                                    location.getLongitude(),
-                                    1
-                            ).get(0);
+                    Geocoder geocoder = new Geocoder(getContext());
 
-                            // naplneni mapy lokaci, daty z adresy
-                            address.put("Country", currentAddress.getCountryName());
-                            address.put("Region", currentAddress.getAdminArea());
-                            address.put("City", currentAddress.getSubAdminArea());
+                    try {
+                        // prevedeni souradnic na adresu
+                        currentAddress = geocoder.getFromLocation(
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                1).get(0);
 
-                            // aktualizace lokace ve firestore
-                            currentProfileRef.update("location", address);
+                        // naplneni mapy lokaci, daty z adresy
+                        address.put("Country", currentAddress.getCountryName());
+                        address.put("Region", currentAddress.getAdminArea());
+                        address.put("City", currentAddress.getSubAdminArea());
 
-                            locationOutput.setText(address.get("City"));
+                        // aktualizace lokace ve firestore
+                        currentProfileRef.update("location", address);
 
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        // aktualni lokace nebyla pristupna -> nacteme z firebase
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, Looper.getMainLooper());
+
+            if(address.size() == 0) {
+                // aktualni lokace nebyla dostupna -> nacteme z firebase
                         firestore.collection("Profiles")
                                 .document(signedUser.getUid())
                                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                 address = documentSnapshot.toObject(User.class).getLocation();
-                                locationOutput.setText(address.get("City"));
+                                if(address != null && address.size() > 0) {
+                                    locationOutput.setText(address.get("City"));
+                                }
                             }
                         });
+            }
+            locationOutput.setText(address.get("City"));
 
-                        // pokud nemame adresu ve firebase
-                        if(locationOutput.getText().toString().equals("")) {
-                            locationOutput.setText("Couldn\'t get your location");
-                        }
-                    }
-                }
-            });
+            if(locationOutput.getText().toString().equals("")) {
+                locationOutput.setText("Couldn\'t get your location");
+
+                // Pro testovani vyuzitim Android emulatoru
+                setupEmulatorLocationData(50.211638, 15.853495);
+            }
         }
+    }
+
+    // Metoda pro umele nastaveni lokace
+    private void setupEmulatorLocationData(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(getContext());
+        Address currentAddress = null;
+        try {
+            currentAddress = geocoder.getFromLocation(
+                    latitude,
+                    longitude,
+                    1).get(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // naplneni mapy lokaci, daty z adresy
+        address.put("Country", currentAddress.getCountryName());
+        address.put("Region", currentAddress.getAdminArea());
+        address.put("City", currentAddress.getSubAdminArea());
+        // aktualizace lokace ve firestore
+        currentProfileRef.update("location", address);
+        locationOutput.setText(address.get("City"));
     }
 
     private void setupLocationSpinner() {
@@ -165,25 +208,28 @@ public class SearchFragment extends Fragment {
         spinner.setAdapter(spinnerAdapter);
 
         //Nastaveni vyberu lokaci
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0:
-                        locationOutput.setText(address.get("City"));
-                        break;
-                    case 1:
-                        locationOutput.setText(address.get("Region"));
-                        break;
-                    case 2:
-                        locationOutput.setText(address.get("Country"));
-                        break;
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if(address!=null && address.size() > 0) {
+                        switch (position) {
+                            case 0:
+                                locationOutput.setText(address.get("City"));
+                                break;
+                            case 1:
+                                locationOutput.setText(address.get("Region"));
+                                break;
+                            case 2:
+                                locationOutput.setText(address.get("Country"));
+                                break;
+                        }
+                    }
                 }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
     }
 
 
@@ -194,20 +240,20 @@ public class SearchFragment extends Fragment {
             public void onClick(View view) {
                 switch (spinner.getSelectedItemPosition()){
                     case 0:
-                        queryProfiles("location.City");
+                        queryProfiles("location.City", locationOutput.getText().toString());
                         break;
                     case 1:
-                        queryProfiles("location.Region");
+                        queryProfiles("location.Region", locationOutput.getText().toString());
                         break;
                     case 2:
-                        queryProfiles("location.Country");
+                        queryProfiles("location.Country", locationOutput.getText().toString());
                         break;
                 }
             }
         });
     }
 
-    private void queryProfiles(final String locationField) {
+    private void queryProfiles(final String locationField, final String userLocation) {
 
         final List<User> profiles = new ArrayList<>();
         //nacteni uzivatele
@@ -215,11 +261,11 @@ public class SearchFragment extends Fragment {
             @Override
             public void onSuccess(final DocumentSnapshot documentSnapshot) {
                 final User user = documentSnapshot.toObject(User.class);
-                if(user != null && user.getTags() != null) {
+                if(user != null && user.getTags().size() > 0) {
                     // nacteni profilu kde je stejna vybrana lokace (city=city / region=region...)
                     FirebaseFirestore.getInstance()
                             .collection("Profiles")
-                            .whereEqualTo(locationField, locationOutput.getText().toString())
+                            .whereEqualTo(locationField, userLocation)
                             .whereArrayContainsAny("tags", user.getTags())
                             .limit(50)
                             .get()

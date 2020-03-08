@@ -27,13 +27,12 @@
                     android:layout_height="wrap_content"
                     android:textSize="18dp"
                     android:text="Location:"/>
+
                 <TextView
+                    android:id="@+id/fSearch_locationOutput"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/fSearch_locationOutput"
-                    android:textSize="18dp"
-                    android:text="Adress, adress 132"
-                    />
+                    android:textSize="18dp" />
             </LinearLayout>
 
             <Spinner

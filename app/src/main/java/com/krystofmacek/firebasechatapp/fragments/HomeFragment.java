@@ -3,6 +3,7 @@ package com.krystofmacek.firebasechatapp.fragments;
 import android.app.Dialog;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -87,16 +90,18 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                         chats.clear();
-                        List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
-                        for (DocumentSnapshot chat: docs) {
-                            chats.add(chat.toObject(Chat.class));
-                        }
-                        ChatAdapter adapter = new ChatAdapter(getContext(), chats);
+                        if(queryDocumentSnapshots != null) {
+                            List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
+                            for (DocumentSnapshot chat: docs) {
+                                chats.add(chat.toObject(Chat.class));
+                            }
+                            ChatAdapter adapter = new ChatAdapter(getContext(), chats);
 
-                        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                        recyclerRecentChats.setLayoutManager(layoutManager);
-                        recyclerRecentChats.setAdapter(adapter);
+                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                            recyclerRecentChats.setLayoutManager(layoutManager);
+                            recyclerRecentChats.setAdapter(adapter);
+                        }
                     }
                 });
     }
@@ -114,16 +119,18 @@ public class HomeFragment extends Fragment {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot.exists()){
+                    Log.i("First login", "Exists not first login");
                     signedUser = documentSnapshot.toObject(User.class);
-                    if (signedUser != null) {
-                        // pokud nema uzivatel nastaveny profil
-                        if(signedUser.getDisplayName() == null || signedUser.getDisplayName().equals("")) {
-                            viewTxtUsername.setText("Please setup your profile");
-                        } else {
-                            viewTxtUsername.setText(signedUser.getDisplayName());
-                        }
+                    // pokud nema uzivatel nastaveny profil
+                    if(signedUser.getDisplayName() == null || signedUser.getDisplayName().equals("")) {
+                        viewTxtUsername.setText("Please setup your profile");
+                    } else {
+                        viewTxtUsername.setText(signedUser.getDisplayName());
                     }
                     createTagsString(viewTxtTags);
+                } else {
+                    signedUserProfileRef.set(new User());
+                    viewTxtUsername.setText("Please setup your profile");
                 }
             }
         });
