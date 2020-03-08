@@ -70,6 +70,7 @@ public class RecentConversationsFragment extends Fragment {
                                 @Override
                                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                                     if(queryDocumentSnapshots != null) {
+                                        recentChats.clear();
                                         recentChats.addAll(queryDocumentSnapshots.toObjects(Chat.class));
                                     }
                                     ChatAdapter adapter = new ChatAdapter(getContext(), recentChats);

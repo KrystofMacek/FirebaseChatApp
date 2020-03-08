@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.activity.MainActivity;
@@ -141,7 +142,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                             FirebaseFirestore.getInstance()
                                     .collection("Chats")
                                     .document(chat.getUid())
-                                    .collection("Messages").orderBy("timestamp")
+                                    .collection("Messages")
+                                    .orderBy("timestamp", Query.Direction.DESCENDING)
                                     .limit(1)
                                     .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                 @Override
