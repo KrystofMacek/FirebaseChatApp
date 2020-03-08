@@ -58,31 +58,31 @@ public class FriendsFragment extends Fragment {
         //nacteni seznamu pratel
         firestore.collection("Profiles")
                 .document(auth.getCurrentUser().getUid())
-                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                ids.clear();
-                User user = documentSnapshot.toObject(User.class);
-                ids.addAll(user.getFriends());
-                if(ids.size() > 0) {
-                    // z kolekce uzivatelu nacteme odpovidajici pratele
-                    // seradime podle abecendy
-                    firestore.collection("Profiles")
-                            .whereIn("uid", ids)
-                            .orderBy("displayName", Query.Direction.ASCENDING)
-                            .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                @Override
-                                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                                    friendsList.clear();
-                                    friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
+                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                        ids.clear();
+                        User user = documentSnapshot.toObject(User.class);
+                        ids.addAll(user.getFriends());
+                        if(ids.size() > 0) {
+                            // z kolekce uzivatelu nacteme odpovidajici pratele
+                            // seradime podle abecendy
+                            firestore.collection("Profiles")
+                                    .whereIn("uid", ids)
+                                    .orderBy("displayName", Query.Direction.ASCENDING)
+                                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                                            friendsList.clear();
+                                            friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
 
-                                    FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
-                                    LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-                                    layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                                    recyclerFriends.setLayoutManager(layoutManager);
-                                    recyclerFriends.setAdapter(adapter);
-                                }
-                            });
+                                            FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
+                                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+                                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                                            recyclerFriends.setLayoutManager(layoutManager);
+                                            recyclerFriends.setAdapter(adapter);
+                                        }
+                                    });
                 }
             }
         });

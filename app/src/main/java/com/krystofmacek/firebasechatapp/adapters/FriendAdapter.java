@@ -14,8 +14,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
@@ -28,6 +30,7 @@ import com.krystofmacek.firebasechatapp.model.User;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -145,23 +148,24 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                     .collection("Messages")
                                     .orderBy("timestamp", Query.Direction.DESCENDING)
                                     .limit(1)
-                                    .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                @Override
-                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                    if(queryDocumentSnapshots.size() > 0){
-                                        DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
-                                        Message lastMessage = doc.toObject(Message.class);
-                                        lastMessageView.setText(lastMessage.getMessageText());
-                                        if(!lastMessage.getAuthor().equals(signedUser.getUid())) {
-                                            lastMessageView
-                                                    .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
+                                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                                            if(queryDocumentSnapshots.size() > 0){
+                                                DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
+                                                Message lastMessage = doc.toObject(Message.class);
+                                                lastMessageView.setText(lastMessage.getMessageText());
+                                                if(!lastMessage.getAuthor().equals(signedUser.getUid())) {
+                                                    lastMessageView
+                                                            .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
 
+                                                }
+                                            } else {
+                                                lastMessageView.setText("No Messages");
+                                            }
                                         }
-                                    } else {
-                                        lastMessageView.setText("No Messages");
-                                    }
-                                }
-                            });
+                                    });
+
                         }
                     }
                 }
