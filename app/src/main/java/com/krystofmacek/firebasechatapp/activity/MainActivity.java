@@ -13,6 +13,9 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.krystofmacek.firebasechatapp.R;
@@ -128,6 +131,14 @@ public class MainActivity extends AppCompatActivity {
     private void logout() {
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(MainActivity.this, SignupActivity.class));
+
+        // logout google account
+        GoogleSignInClient googleClient = GoogleSignIn.getClient(getApplication(),
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getApplication().getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build());
+        googleClient.signOut();
         finish();
     }
 

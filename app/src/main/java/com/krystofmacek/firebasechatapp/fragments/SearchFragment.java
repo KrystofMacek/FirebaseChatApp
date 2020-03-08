@@ -134,12 +134,14 @@ public class SearchFragment extends Fragment {
                                 1).get(0);
 
                         // naplneni mapy lokaci, daty z adresy
-                        address.put("Country", currentAddress.getCountryName());
-                        address.put("Region", currentAddress.getAdminArea());
-                        address.put("City", currentAddress.getSubAdminArea());
 
-                        // aktualizace lokace ve firestore
-                        currentProfileRef.update("location", address);
+                            address.put("Country", currentAddress.getCountryName());
+                            address.put("Region", currentAddress.getAdminArea());
+                            address.put("City", currentAddress.getSubAdminArea());
+                            // aktualizace lokace ve firestore
+                            currentProfileRef.update("location", address);
+
+
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -173,7 +175,7 @@ public class SearchFragment extends Fragment {
         }
     }
 
-    // Metoda pro umele nastaveni lokace
+    // Metoda pro testovani lokace v emulatoru
     private void setupEmulatorLocationData(double latitude, double longitude) {
         Geocoder geocoder = new Geocoder(getContext());
         Address currentAddress = null;

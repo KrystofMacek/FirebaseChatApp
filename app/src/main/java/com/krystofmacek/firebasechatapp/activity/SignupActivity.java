@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,17 +32,23 @@ public class SignupActivity extends AppCompatActivity {
 
         mAuthUI = AuthUI.getInstance();
 
-
         // Enable sign-in providers
         startActivityForResult(mAuthUI
                         .createSignInIntentBuilder()
                         .setAvailableProviders(Arrays.asList(
                                 new AuthUI.IdpConfig.EmailBuilder().setRequireName(false).build(),
-                                new AuthUI.IdpConfig.GoogleBuilder().build()
+                                new AuthUI.IdpConfig.GoogleBuilder().setSignInOptions(
+                                        new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                                .requestIdToken(getString(R.string.default_web_client_id))
+                                                .requestEmail()
+                                                .build()
+                                ).build()
                         ))
+                .setIsSmartLockEnabled(false)
                         .setLogo(R.drawable.splash_image)
                         .build(),
                 RC_SIGN_IN);
+
 
         // TODO: přidat Facebook authenticaion
 
@@ -78,4 +85,9 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }
