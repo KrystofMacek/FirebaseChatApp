@@ -38,6 +38,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.android.support:multidex:1.0.3'
 
+    //fb login
+    implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
+
     //firestore ui
     implementation 'com.firebaseui:firebase-ui-firestore:6.2.0'
 

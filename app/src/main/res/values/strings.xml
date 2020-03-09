@@ -9,4 +9,7 @@
         <item>Country</item>
     </string-array>
 
+    <string name="facebook_application_id" translatable="false">2506066756275860</string>
+    <string name="facebook_login_protocol_scheme" translatable="false">fbYOUR_APP_ID</string>
+
 </resources>

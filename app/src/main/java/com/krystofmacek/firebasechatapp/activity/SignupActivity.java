@@ -42,16 +42,14 @@ public class SignupActivity extends AppCompatActivity {
                                                 .requestIdToken(getString(R.string.default_web_client_id))
                                                 .requestEmail()
                                                 .build()
-                                ).build()
+                                ).build(),
+                                new AuthUI.IdpConfig.FacebookBuilder().build()
                         ))
                 .setIsSmartLockEnabled(false)
                         .setLogo(R.drawable.splash_image)
                         .build(),
                 RC_SIGN_IN);
-
-
         // TODO: přidat Facebook authenticaion
-
     }
 
     @Override

@@ -121,6 +121,14 @@ public class SearchFragment extends Fragment {
                     super.onLocationResult(locationResult);
                     Location location = locationResult.getLastLocation();
 
+                    // V emulatoru vraci 37.421998 -122.084 = Google HQ
+                    //  50.208917, 15.831632 = HK
+                    if(location.getLatitude() == 37.421998 && location.getLongitude() == -122.084) {
+                        location.setLatitude(50.208917);
+                        location.setLongitude(15.831632);
+                    }
+
+
                     Log.i("Location", location.getLatitude() + " " + location.getLongitude());
 
                     Address currentAddress;
@@ -134,14 +142,11 @@ public class SearchFragment extends Fragment {
                                 1).get(0);
 
                         // naplneni mapy lokaci, daty z adresy
-
                             address.put("Country", currentAddress.getCountryName());
                             address.put("Region", currentAddress.getAdminArea());
                             address.put("City", currentAddress.getSubAdminArea());
                             // aktualizace lokace ve firestore
                             currentProfileRef.update("location", address);
-
-
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -168,32 +173,8 @@ public class SearchFragment extends Fragment {
 
             if(locationOutput.getText().toString().equals("")) {
                 locationOutput.setText("Couldn\'t get your location");
-
-                // Pro testovani vyuzitim Android emulatoru
-                setupEmulatorLocationData(50.211638, 15.853495);
             }
         }
-    }
-
-    // Metoda pro testovani lokace v emulatoru
-    private void setupEmulatorLocationData(double latitude, double longitude) {
-        Geocoder geocoder = new Geocoder(getContext());
-        Address currentAddress = null;
-        try {
-            currentAddress = geocoder.getFromLocation(
-                    latitude,
-                    longitude,
-                    1).get(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // naplneni mapy lokaci, daty z adresy
-        address.put("Country", currentAddress.getCountryName());
-        address.put("Region", currentAddress.getAdminArea());
-        address.put("City", currentAddress.getSubAdminArea());
-        // aktualizace lokace ve firestore
-        currentProfileRef.update("location", address);
-        locationOutput.setText(address.get("City"));
     }
 
     private void setupLocationSpinner() {

@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 .requestEmail()
                 .build());
         googleClient.signOut();
-        finish();
+        //finish();
     }
 
     // nastaveni navigace mezi fragmenty vuzitim BackButton
