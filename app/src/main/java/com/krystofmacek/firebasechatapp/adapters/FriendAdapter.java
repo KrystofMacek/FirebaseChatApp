@@ -21,7 +21,6 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
-import com.krystofmacek.firebasechatapp.activity.MainActivity;
 import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.Message;
@@ -155,7 +154,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                                 DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
                                                 Message lastMessage = doc.toObject(Message.class);
                                                 lastMessageView.setText(lastMessage.getMessageText());
-                                                if(!lastMessage.getAuthor().equals(signedUser.getUid())) {
+                                                if(!lastMessage.getAuthorId().equals(signedUser.getUid())) {
                                                     lastMessageView
                                                             .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
 

@@ -142,9 +142,11 @@ public class SearchFragment extends Fragment {
                                 1).get(0);
 
                         // naplneni mapy lokaci, daty z adresy
+                        if(currentAddress!=null) {
                             address.put("Country", currentAddress.getCountryName());
                             address.put("Region", currentAddress.getAdminArea());
                             address.put("City", currentAddress.getSubAdminArea());
+                        }
                             // aktualizace lokace ve firestore
                             currentProfileRef.update("location", address);
 

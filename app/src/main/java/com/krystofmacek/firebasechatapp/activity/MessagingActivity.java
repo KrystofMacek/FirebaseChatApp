@@ -2,7 +2,6 @@ package com.krystofmacek.firebasechatapp.activity;
 
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,13 +11,10 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -35,7 +31,6 @@ import com.krystofmacek.firebasechatapp.model.User;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -192,7 +187,7 @@ public class MessagingActivity extends AppCompatActivity {
                         .collection("Messages")
                         .document();
                 // Do dokumentu se ulozi objekt nove zpravy
-                Message newMessage = new Message(signedUser.getUid(), inputMessageText.getText().toString(), Timestamp.now());
+                Message newMessage = new Message(signedUser.getUid(), userId, inputMessageText.getText().toString(), Timestamp.now());
                 newMessageDoc.set(newMessage);
                 inputMessageText.setText("");
 
@@ -200,6 +195,8 @@ public class MessagingActivity extends AppCompatActivity {
                 firestore.collection("Chats")
                         .document(chatId)
                         .update("lastMessageTime", newMessage.getTimestamp());
+
+
 
             }
         });

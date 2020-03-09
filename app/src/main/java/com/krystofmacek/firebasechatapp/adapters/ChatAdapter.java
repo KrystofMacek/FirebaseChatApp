@@ -10,14 +10,12 @@ import android.widget.TextView;
 
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.common.io.Resources;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.core.OrderBy;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.Chat;
@@ -106,7 +104,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
                     DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
                     Message lastMessage = doc.toObject(Message.class);
                     lastMessageView.setText(lastMessage.getMessageText());
-                    if(!lastMessage.getAuthor().equals(signedUser.getUid())) {
+                    if(lastMessage.getAuthorId() != null && !lastMessage.getAuthorId().equals(signedUser.getUid())) {
                         lastMessageView
                                 .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
 

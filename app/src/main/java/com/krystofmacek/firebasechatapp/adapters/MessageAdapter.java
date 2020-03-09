@@ -1,7 +1,6 @@
 package com.krystofmacek.firebasechatapp.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +69,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public int getItemViewType(int position) {
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if(messages.get(position).getAuthor().equals(user.getUid())) {
+        if(messages.get(position).getAuthorId().equals(user.getUid())) {
             return MSG_TYPE_RIGHT;
         } else {
             return MSG_TYPE_LEFT;

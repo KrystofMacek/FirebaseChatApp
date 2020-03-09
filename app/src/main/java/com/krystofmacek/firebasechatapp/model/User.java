@@ -1,5 +1,14 @@
 package com.krystofmacek.firebasechatapp.model;
 
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,19 +23,28 @@ public class User {
     private List<String> tags = new ArrayList<>();
     private List<String> friends = new ArrayList<>();
     private List<String> activeChats = new ArrayList<>();
+    private String registrationToken;
 
     public User() {
     }
 
-    public User(String uid, String displayName, Map<String, String> location, List<String> tags, List<String> friends, List<String> activeChats) {
+    public User(String uid, String displayName, Map<String, String> location, List<String> tags, List<String> friends, List<String> activeChats, String registrationToken) {
         this.uid = uid;
         this.displayName = displayName;
         this.location = location;
         this.tags = tags;
         this.friends = friends;
         this.activeChats = activeChats;
+        this.registrationToken = registrationToken;
     }
 
+    public String getRegistrationToken() {
+        return registrationToken;
+    }
+
+    public void setRegistrationToken(String registrationToken) {
+        this.registrationToken = registrationToken;
+    }
 
     public String getUid() {
         return uid;
