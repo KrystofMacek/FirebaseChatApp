@@ -35,6 +35,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.ProfileAdapter;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,11 +59,9 @@ public class SearchFragment extends Fragment {
     private Spinner spinner;
     private Button searchUsersBtn;
 
-    private FirebaseFirestore firestore;
-    private DocumentReference currentProfileRef;
     private FirebaseUser signedUser;
+    private FirestoreService firestoreService;
 
-    private CollectionReference profilesCollectionRef;
 
     //GeoLocation
     private Map<String, String> address;
@@ -82,11 +81,8 @@ public class SearchFragment extends Fragment {
         searchUsersBtn = view.findViewById(R.id.fSearch_searchUserBtn);
 
         // firebase obj
-        firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
-        // references
-        profilesCollectionRef = firestore.collection("Profiles");
-        currentProfileRef = profilesCollectionRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        firestoreService = new FirestoreService();
 
         address = new HashMap<>();
 
@@ -148,9 +144,9 @@ public class SearchFragment extends Fragment {
                 });
                 if(address.size() == 0)
                 // aktualni lokace nebyla dostupna -> nacteme z firebase
-                        firestore.collection("Profiles")
-                                .document(signedUser.getUid())
-                                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        firestoreService.getSignedUserDocumentRef()
+                                .get()
+                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                 Map<String, String> fLocation = documentSnapshot.toObject(User.class).getLocation();
@@ -190,7 +186,7 @@ public class SearchFragment extends Fragment {
                 setupLocationSpinner();
             }
             // aktualizace lokace ve firestore
-            currentProfileRef.update("location", address);
+            firestoreService.updateField("Profiles", signedUser.getUid(), "location", address);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -260,18 +256,16 @@ public class SearchFragment extends Fragment {
 
         final List<User> profiles = new ArrayList<>();
         //nacteni uzivatele
-        currentProfileRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firestoreService
+                .getSignedUserDocumentRef()
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(final DocumentSnapshot documentSnapshot) {
                 final User user = documentSnapshot.toObject(User.class);
                 if(user != null && user.getTags().size() > 0) {
                     // nacteni profilu kde je stejna vybrana lokace (city=city / region=region...)
-                    FirebaseFirestore.getInstance()
-                            .collection("Profiles")
-                            .whereEqualTo(locationField, userLocation)
-                            .whereArrayContainsAny("tags", user.getTags())
-                            .limit(50)
-                            .get()
+                    firestoreService.searchUsersQuery(locationField, userLocation, user.getTags())
                         .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                             @Override
                             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {

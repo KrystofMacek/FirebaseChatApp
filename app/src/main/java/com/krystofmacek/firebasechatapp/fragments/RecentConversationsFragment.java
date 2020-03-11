@@ -18,6 +18,7 @@ import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.ChatAdapter;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class RecentConversationsFragment extends Fragment {
 
-    private FirebaseFirestore firestore;
-    private FirebaseUser signedUser;
+    private FirestoreService firestoreService;
     private RecyclerView recentChatRecycler;
 
     @Override
@@ -41,8 +41,7 @@ public class RecentConversationsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_recent_conversations, container, false);
 
         // inicializace firebase obj a UI
-        firestore = FirebaseFirestore.getInstance();
-        signedUser = FirebaseAuth.getInstance().getCurrentUser();
+        firestoreService = new FirestoreService();
         recentChatRecycler = view.findViewById(R.id.fChats_Recent_recycler);
 
         loadRecentChats();
@@ -54,8 +53,10 @@ public class RecentConversationsFragment extends Fragment {
     private void loadRecentChats() {
         final List<Chat> recentChats = new ArrayList<>();
         // Nacteni dokumentu uzivatele
-        firestore.collection("Profiles").document(signedUser.getUid())
-                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firestoreService
+                .getSignedUserDocumentRef()
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 User user = documentSnapshot.toObject(User.class);
@@ -63,8 +64,7 @@ public class RecentConversationsFragment extends Fragment {
                 if(!chatIds.isEmpty()){
                     // nacteme vsechny chaty, serazene podle casu posledni zpravy od nejnovejsich
                     // Pridan custom index ve fristore
-                    firestore.collection("Chats")
-                            .whereIn("uid", chatIds)
+                    firestoreService.queryByWhereIn("Chats", "uid", chatIds)
                             .orderBy("lastMessageTime", Query.Direction.DESCENDING)
                             .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                 @Override

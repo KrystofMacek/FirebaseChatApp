@@ -25,6 +25,7 @@ import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.Message;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.List;
 
@@ -38,11 +39,13 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     private Context context;
     private List<User> profiles;
     private FirebaseUser signedUser;
+    private FirestoreService firestoreService;
 
     public FriendAdapter(Context context, List<User> profiles) {
         this.context = context;
         this.profiles = profiles;
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
+        firestoreService = new FirestoreService();
     }
 
     @NonNull
@@ -99,10 +102,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 remove.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        FirebaseFirestore.getInstance()
-                                .collection("Profiles")
-                                .document(signedUser.getUid())
-                                .update("friends", FieldValue.arrayRemove(profile.getUid()));
+                        firestoreService.updateField("Profiles",signedUser.getUid(), "friends", FieldValue.arrayRemove(profile.getUid()));
                         removeFriendDialog.cancel();
                     }
                 });
@@ -128,9 +128,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     private void getLastMessage(final TextView lastMessageView, final String friendId) {
         // Najdeme odpovidajici Chat
-        FirebaseFirestore.getInstance()
-                .collection("Chats")
-                .whereArrayContains("members", friendId)
+        firestoreService.queryByArrayContains("Chats", "members", friendId)
                 .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -139,14 +137,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                     if(chat != null) {
                         if(chat.getMembers().get(0).equals(signedUser.getUid()) ||
                                 chat.getMembers().get(1).equals(signedUser.getUid())){
-
                             // Z chatu dostaneme posledni zpravu
-                            FirebaseFirestore.getInstance()
-                                    .collection("Chats")
-                                    .document(chat.getUid())
-                                    .collection("Messages")
-                                    .orderBy("timestamp", Query.Direction.DESCENDING)
-                                    .limit(1)
+                            firestoreService.queryForLastMessage(chat.getUid())
                                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                         @Override
                                         public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -157,19 +149,16 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                                 if(!lastMessage.getAuthorId().equals(signedUser.getUid())) {
                                                     lastMessageView
                                                             .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
-
                                                 }
                                             } else {
                                                 lastMessageView.setText("No Messages");
                                             }
                                         }
                                     });
-
                         }
                     }
                 }
             }
         });
-
     }
 }

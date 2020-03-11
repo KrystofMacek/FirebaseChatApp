@@ -18,11 +18,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.ChatAdapter;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +32,9 @@ import java.util.List;
 
 public class NewConversationsFragment extends Fragment {
 
-    FirebaseFirestore firestore;
-    FirebaseUser signedUser;
-    RecyclerView newChatRecycler;
+    private FirestoreService firestoreService;
+    private FirebaseUser signedUser;
+    private RecyclerView newChatRecycler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -40,8 +42,9 @@ public class NewConversationsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_new_conversations, container, false);
 
         // inicializce ui a fireb obj
-        firestore = FirebaseFirestore.getInstance();
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
+        firestoreService = new FirestoreService();
+
         newChatRecycler = view.findViewById(R.id.fChats_New_recycler);
 
         loadNewChats();
@@ -53,7 +56,7 @@ public class NewConversationsFragment extends Fragment {
         final List<Chat> newChats = new ArrayList<>();
 
         // nacteme seznam aktivnich chatu
-        firestore.collection("Profiles").document(signedUser.getUid())
+        firestoreService.getSignedUserDocumentRef()
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -61,9 +64,9 @@ public class NewConversationsFragment extends Fragment {
                         documentSnapshot.toObject(User.class).getActiveChats();
 
                 // nacteme vsechny chaty ve kterych je uzivatel clenem
-                firestore.collection("Chats")
-                        .whereArrayContains("members", signedUser.getUid())
-                        .orderBy("lastMessageTime")
+                firestoreService
+                        .queryByArrayContains("Cats", "members", signedUser.getUid())
+                        .orderBy("lastMessageTime", Query.Direction.DESCENDING)
                         .addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
                             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {

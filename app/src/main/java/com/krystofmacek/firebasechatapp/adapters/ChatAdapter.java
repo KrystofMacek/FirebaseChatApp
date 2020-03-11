@@ -21,6 +21,7 @@ import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.Message;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.List;
 
@@ -33,11 +34,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     private Context context;
     private List<Chat> chats;
     private FirebaseUser signedUser;
+    private FirestoreService firestoreService;
+
 
     public ChatAdapter(Context context, List<Chat> chats) {
         this.context = context;
         this.chats = chats;
         signedUser = FirebaseAuth.getInstance().getCurrentUser();
+        firestoreService = new FirestoreService();
     }
 
     @NonNull
@@ -69,9 +73,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         final Chat chat = chats.get(position);
         String userId = chat.getOtherMember(signedUser.getUid());
         // nacteni uzivatelskeho jmena
-        FirebaseFirestore.getInstance().collection("Profiles")
-                .document(userId)
-                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firestoreService
+                .getDocumentReference("Profiles", userId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 User user = documentSnapshot.toObject(User.class);
@@ -96,11 +101,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     // nacteni posledni zpravy z chatu
     private void getLastMessage(final TextView lastMessageView, final Chat chat) {
-        FirebaseFirestore.getInstance()
-                .collection("Chats")
-                .document(chat.getUid())
-                .collection("Messages").orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(1)
+        firestoreService.queryForLastMessage(chat.getUid())
                 .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {

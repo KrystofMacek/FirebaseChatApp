@@ -49,7 +49,6 @@ public class SignupActivity extends AppCompatActivity {
                         .setLogo(R.drawable.splash_image)
                         .build(),
                 RC_SIGN_IN);
-        // TODO: přidat Facebook authenticaion
     }
 
     @Override

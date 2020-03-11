@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
      // Metody poskytující navigaci mezi Aktivitami
      // setupNavigation(), onCreateOptionsMenu(Menu menu), onOptionsItemSelected(@NonNull MenuItem item)
-
     private void setupNavigation() {
 
         // Inicializace top action baru

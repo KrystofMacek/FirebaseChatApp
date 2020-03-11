@@ -18,10 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -30,12 +30,12 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.FirebaseInstanceIdReceiver;
 import com.google.firebase.iid.InstanceIdResult;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.ChatAdapter;
 import com.krystofmacek.firebasechatapp.model.Chat;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +50,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class HomeFragment extends Fragment {
 
-    private FirebaseFirestore firestore;
-    private String signedUserUid;
-    private DocumentReference signedUserProfileRef;
-    private User signedUser;
+    private FirebaseUser signedUser;
+    private User signedUserObject;
+    private FirestoreService firestoreService;
 
     private TextView viewTxtUsername;
     private TextView viewTxtTags;
@@ -74,21 +73,50 @@ public class HomeFragment extends Fragment {
         recyclerRecentChats = view.findViewById(R.id.fHome_recycler);
 
         //firebase objekty
-        firestore = FirebaseFirestore.getInstance();
-        signedUserUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        signedUser = FirebaseAuth.getInstance().getCurrentUser();
+        firestoreService = new FirestoreService();
 
         loadUser();
         setupDialog();
         loadRecentChats();
 
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadRecentChats();
+    }
+
+    // Nacteni dat o uzivateli
+    private void loadUser() {
+        firestoreService.getSignedUserDocumentRef()
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists()){
+                    Log.i("First login", "Exists not first login");
+                    signedUserObject = documentSnapshot.toObject(User.class);
+                    // pokud nema uzivatel nastaveny profil
+                    if(signedUserObject.getDisplayName() == null || signedUserObject.getDisplayName().equals("")) {
+                        viewTxtUsername.setText("Please setup your profile");
+                    } else {
+                        viewTxtUsername.setText(signedUserObject.getDisplayName());
+                    }
+                    createTagsString(viewTxtTags);
+                } else {
+                    firestoreService.getSignedUserDocumentRef().set(new User());
+                    viewTxtUsername.setText("Please setup your profile");
+                }
+            }
+        });
     }
 
     private void loadRecentChats() {
         final List<Chat> chats = new ArrayList<>();
-        firestore.collection("Chats")
-                .whereArrayContains("members", signedUserUid)
+        firestoreService.queryByArrayContains("Chats", "members", signedUser.getUid())
                 .orderBy("lastMessageTime", Query.Direction.DESCENDING)
                 .limit(5)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -110,57 +138,6 @@ public class HomeFragment extends Fragment {
                             recyclerRecentChats.setLayoutManager(layoutManager);
                             recyclerRecentChats.setAdapter(adapter);
                         }
-                    }
-                });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadRecentChats();
-    }
-
-    // Nacteni dat o uzivateli
-    private void loadUser() {
-        signedUserProfileRef = firestore.collection("Profiles").document(signedUserUid);
-        signedUserProfileRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if(documentSnapshot.exists()){
-                    Log.i("First login", "Exists not first login");
-                    signedUser = documentSnapshot.toObject(User.class);
-                    // pokud nema uzivatel nastaveny profil
-                    if(signedUser.getDisplayName() == null || signedUser.getDisplayName().equals("")) {
-                        viewTxtUsername.setText("Please setup your profile");
-                    } else {
-                        viewTxtUsername.setText(signedUser.getDisplayName());
-                    }
-                    createTagsString(viewTxtTags);
-                } else {
-                    signedUserProfileRef.set(new User());
-                    viewTxtUsername.setText("Please setup your profile");
-                }
-            }
-        });
-    }
-
-    private void setRegistrationToken() {
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w("Token", "getInstanceId failed", task.getException());
-                            return;
-                        }
-
-                        String token = task.getResult().getToken();
-                        FirebaseFirestore.getInstance().collection("Profiles")
-                                .document(signedUserUid)
-                                .update("registrationToken", token);
-
-                        Log.w("Token", "getToken Success : " + token);
-
                     }
                 });
     }
@@ -197,13 +174,13 @@ public class HomeFragment extends Fragment {
                 final TextView tagOutput = editProfileDialog.findViewById(R.id.dialog_tagList);
 
                 //naplneni view elementu
-                if(signedUser == null) {
-                    signedUser = new User();
+                if(signedUserObject == null) {
+                    signedUserObject = new User();
                 }
-                if(signedUser.getDisplayName() != null){
-                    editUsername.setText(signedUser.getDisplayName());
+                if(signedUserObject.getDisplayName() != null){
+                    editUsername.setText(signedUserObject.getDisplayName());
                 }
-                if(signedUser.getTags() != null) {
+                if(signedUserObject.getTags() != null) {
                     createTagsString(tagOutput);
                 }
 
@@ -211,7 +188,7 @@ public class HomeFragment extends Fragment {
                 clearTags.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        signedUser.getTags().clear();
+                        signedUserObject.getTags().clear();
                         tagOutput.setText("");
                     }
                 });
@@ -221,7 +198,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         if(!addTagInput.getText().toString().equals("")) {
-                            signedUser.getTags().add(addTagInput.getText().toString().toLowerCase().replaceAll("\\s",""));
+                            signedUserObject.getTags().add(addTagInput.getText().toString().toLowerCase().replaceAll("\\s",""));
                             addTagInput.setText("");
                             createTagsString(tagOutput);
                         }
@@ -241,28 +218,45 @@ public class HomeFragment extends Fragment {
                 saveProfileBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        signedUser.setDisplayName(editUsername.getText().toString());
-                        signedUser.setUid(signedUserUid);
-                        firestore.collection("Profiles")
-                                .document(signedUserUid)
-                                .set(signedUser);
+                        signedUserObject.setDisplayName(editUsername.getText().toString());
+                        signedUserObject.setUid(signedUser.getUid());
+                        firestoreService.getSignedUserDocumentRef().set(signedUserObject);
                         setRegistrationToken();
+
                         Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_LONG).show();
                         editProfileDialog.cancel();
-                        viewTxtUsername.setText(signedUser.getDisplayName());
+                        viewTxtUsername.setText(signedUserObject.getDisplayName());
                         createTagsString(viewTxtTags);
                     }
                 });
             }
         });
+    }
+    private void setRegistrationToken() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("Token", "getInstanceId failed", task.getException());
+                            return;
+                        }
 
+                        String token = task.getResult().getToken();
+                        firestoreService
+                                .updateField("Profiles", signedUser.getUid(),"registrationToken", token);
+
+                        Log.w("Token", "getToken Success : " + token);
+
+                    }
+                });
     }
 
     // metoda pro vypsani jednotlivych tagu do textView elementu
     private void createTagsString(TextView output) {
         output.setText("");
         StringBuilder tagList = new StringBuilder();
-        for (String tag : signedUser.getTags()) {
+        for (String tag : signedUserObject.getTags()) {
             tagList.append("#").append(tag).append(" ");
         }
         if(tagList.toString().equals("")){

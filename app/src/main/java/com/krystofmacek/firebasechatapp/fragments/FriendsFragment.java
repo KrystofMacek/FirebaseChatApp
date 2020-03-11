@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -20,6 +21,7 @@ import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.FriendAdapter;
 import com.krystofmacek.firebasechatapp.adapters.ProfileAdapter;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class FriendsFragment extends Fragment {
 
     private RecyclerView recyclerFriends;
-
-    private FirebaseFirestore firestore;
-    private FirebaseAuth auth;
+    private FirestoreService firestoreService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,8 +43,7 @@ public class FriendsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
         recyclerFriends = view.findViewById(R.id.fFriends_recycler);
         // inicializace fireB objektu
-        firestore = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
+        firestoreService = new FirestoreService();
         loadFriendsList();
 
         return view;
@@ -56,8 +55,7 @@ public class FriendsFragment extends Fragment {
         final List<String> ids = new ArrayList<>();
 
         //nacteni seznamu pratel
-        firestore.collection("Profiles")
-                .document(auth.getCurrentUser().getUid())
+        firestoreService.getSignedUserDocumentRef()
                 .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                     @Override
                     public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
@@ -67,8 +65,8 @@ public class FriendsFragment extends Fragment {
                         if(ids.size() > 0) {
                             // z kolekce uzivatelu nacteme odpovidajici pratele
                             // seradime podle abecendy
-                            firestore.collection("Profiles")
-                                    .whereIn("uid", ids)
+                            firestoreService
+                                    .queryByWhereIn("Profiles","uid", ids)
                                     .orderBy("displayName", Query.Direction.ASCENDING)
                                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                         @Override
