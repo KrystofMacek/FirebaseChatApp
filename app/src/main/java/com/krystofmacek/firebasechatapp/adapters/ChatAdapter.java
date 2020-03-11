@@ -8,13 +8,14 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
@@ -24,10 +25,6 @@ import com.krystofmacek.firebasechatapp.model.User;
 import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
@@ -112,7 +109,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
                     if(lastMessage.getAuthorId() != null && !lastMessage.getAuthorId().equals(signedUser.getUid())) {
                         lastMessageView
                                 .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
-
                     }
                 } else {
                     lastMessageView.setText("No Messages");

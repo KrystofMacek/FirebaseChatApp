@@ -10,12 +10,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.krystofmacek.firebasechatapp.R;
@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView heading;
     private BottomNavigationView botNavigation;
-    private FrameLayout frameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Navigace mezi jednotlivymi fragmenty
-        frameLayout = findViewById(R.id.fragment_container);
         botNavigation = findViewById(R.id.bot_navigation);
         botNavigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override

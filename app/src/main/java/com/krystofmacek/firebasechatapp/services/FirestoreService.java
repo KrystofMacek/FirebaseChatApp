@@ -36,7 +36,6 @@ public class FirestoreService {
     }
 
     //Handle chats
-
     public String initializeNewChat(final String otherUserId) {
         // vytvoreni noveho dokumentu
         DocumentReference newChatReference = chatsReference.document();
