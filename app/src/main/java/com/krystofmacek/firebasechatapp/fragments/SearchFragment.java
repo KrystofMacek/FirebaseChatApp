@@ -65,7 +65,7 @@ public class SearchFragment extends Fragment {
     private CollectionReference profilesCollectionRef;
 
     //GeoLocation
-    private Map<String, String> address = new HashMap<>();
+    private Map<String, String> address;
     private FusedLocationProviderClient locationProviderClient;
     private static final int LOCATION_REQUEST_CODE = 123;
 
@@ -87,6 +87,8 @@ public class SearchFragment extends Fragment {
         // references
         profilesCollectionRef = firestore.collection("Profiles");
         currentProfileRef = profilesCollectionRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        address = new HashMap<>();
 
         requestLocation();
         setupLocationSpinner();
@@ -128,54 +130,70 @@ public class SearchFragment extends Fragment {
                         location.setLongitude(15.831632);
                     }
 
-
-                    Log.i("Location", location.getLatitude() + " " + location.getLongitude());
-
-                    Address currentAddress;
-                    Geocoder geocoder = new Geocoder(getContext());
-
-                    try {
-                        // prevedeni souradnic na adresu
-                        currentAddress = geocoder.getFromLocation(
-                                location.getLatitude(),
-                                location.getLongitude(),
-                                1).get(0);
-
-                        // naplneni mapy lokaci, daty z adresy
-                        if(currentAddress!=null) {
-                            address.put("Country", currentAddress.getCountryName());
-                            address.put("Region", currentAddress.getAdminArea());
-                            address.put("City", currentAddress.getSubAdminArea());
-                        }
-                            // aktualizace lokace ve firestore
-                            currentProfileRef.update("location", address);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    Log.i("Location", location.getLatitude() + " + " + location.getLongitude());
+                    if(location != null) {
+                        extractLocation(location);
                     }
-
                 }
             }, Looper.getMainLooper());
 
             if(address.size() == 0) {
+                locationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if(location != null) {
+                            extractLocation(location);
+                        }
+                    }
+                });
+                if(address.size() == 0)
                 // aktualni lokace nebyla dostupna -> nacteme z firebase
                         firestore.collection("Profiles")
                                 .document(signedUser.getUid())
                                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                address = documentSnapshot.toObject(User.class).getLocation();
-                                if(address != null && address.size() > 0) {
-                                    locationOutput.setText(address.get("City"));
+                                Map<String, String> fLocation = documentSnapshot.toObject(User.class).getLocation();
+
+                                if(fLocation != null && fLocation.size() > 0) {
+                                    address.put("Country", fLocation.get("Country"));
+                                    address.put("Region", fLocation.get("Region"));
+                                    address.put("City", fLocation.get("City"));
                                 }
                             }
                         });
             }
-            locationOutput.setText(address.get("City"));
-
-            if(locationOutput.getText().toString().equals("")) {
+            if(address.size() != 0) {
+                locationOutput.setText(address.get("City"));
+            } else {
                 locationOutput.setText("Couldn\'t get your location");
             }
+        }
+    }
+
+    private void extractLocation (Location location) {
+        Address currentAddress;
+        Geocoder geocoder = new Geocoder(getContext());
+        try {
+            // prevedeni souradnic na adresu
+            currentAddress = geocoder.getFromLocation(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    1).get(0);
+
+            // naplneni mapy lokaci, daty z adresy
+            if(currentAddress!=null) {
+                address.put("Country", currentAddress.getCountryName());
+                address.put("Region", currentAddress.getAdminArea());
+                address.put("City", currentAddress.getSubAdminArea());
+
+                setupLocationSpinner();
+            }
+            // aktualizace lokace ve firestore
+            currentProfileRef.update("location", address);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -260,7 +278,7 @@ public class SearchFragment extends Fragment {
                                 for(DocumentSnapshot profile : queryDocumentSnapshots.getDocuments()) {
                                     User u = profile.toObject(User.class);
                                     // uzivatel je pridan pokud != prihlasenemu a pokud jiz neni jeho friendslistu
-                                    if(!profile.getId().equals(signedUser.getUid()) &&
+                                    if(u!=null && !profile.getId().equals(signedUser.getUid()) &&
                                         !user.getFriends().contains(u.getUid())) {
                                         profiles.add(u);
                                     }

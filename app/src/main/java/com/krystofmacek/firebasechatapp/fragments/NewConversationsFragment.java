@@ -67,19 +67,21 @@ public class NewConversationsFragment extends Fragment {
                         .addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
                             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                                List<Chat> allChats = queryDocumentSnapshots.toObjects(Chat.class);
                                 newChats.clear();
-                                // zjistime ktere z nactenych jsou nove
-                                for(Chat c : allChats) {
-                                    boolean isNewChat = true;
-                                    for(String activeChatId : activeChats) {
-                                        if(c.getUid().equals(activeChatId)) {
-                                            isNewChat = false;
+                                if(queryDocumentSnapshots != null) {
+                                    List<Chat> allChats = queryDocumentSnapshots.toObjects(Chat.class);
+                                    // zjistime ktere z nactenych jsou nove
+                                    for(Chat c : allChats) {
+                                        boolean isNewChat = true;
+                                        for(String activeChatId : activeChats) {
+                                            if(c.getUid().equals(activeChatId)) {
+                                                isNewChat = false;
+                                            }
                                         }
-                                    }
-                                    // nove pridame do seznamu
-                                    if(isNewChat) {
-                                        newChats.add(c);
+                                        // nove pridame do seznamu
+                                        if(isNewChat && c.getLastMessageTime() != null) {
+                                            newChats.add(c);
+                                        }
                                     }
                                 }
                                 // zobrazime seznam novych chatu

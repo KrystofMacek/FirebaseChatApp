@@ -97,8 +97,11 @@ public class HomeFragment extends Fragment {
                         chats.clear();
                         if(queryDocumentSnapshots != null) {
                             List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
-                            for (DocumentSnapshot chat: docs) {
-                                chats.add(chat.toObject(Chat.class));
+                            for (DocumentSnapshot c: docs) {
+                                Chat chat = c.toObject(Chat.class);
+                                if(chat != null && chat.getLastMessageTime() != null) {
+                                    chats.add(chat);
+                                }
                             }
                             ChatAdapter adapter = new ChatAdapter(getContext(), chats);
 

@@ -62,6 +62,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         }
     }
 
+
     // Napneni UI elementu
     @Override
     public void onBindViewHolder(@NonNull final ChatAdapter.ViewHolder holder, int position) {
@@ -73,7 +74,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                holder.username.setText(documentSnapshot.toObject(User.class).getDisplayName());
+                User user = documentSnapshot.toObject(User.class);
+                if(user != null) {
+                    holder.username.setText(user.getDisplayName());
+                }
             }
         });
 

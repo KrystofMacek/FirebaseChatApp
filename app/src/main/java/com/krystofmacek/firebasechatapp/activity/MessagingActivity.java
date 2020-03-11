@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.model.Document;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.MessageAdapter;
 import com.krystofmacek.firebasechatapp.model.Chat;
@@ -125,28 +126,7 @@ public class MessagingActivity extends AppCompatActivity {
                                             .update("activeChats", FieldValue.arrayUnion(chatId));
                                     // na kolekci Messages pripojime snapshot listener
                                     // ktery sleduje zmeny provedene v teto kolekci - pridani dokumentu msg
-                                    firestore.collection("Chats")
-                                            .document(chatId)
-                                            .collection("Messages")
-                                            .orderBy("timestamp", Query.Direction.ASCENDING)
-                                            .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                                                    if(queryDocumentSnapshots != null) {
-                                                        // vytvoreni listu vsech zprav, serazenych podle timestamp
-                                                        List<Message> messagesList = queryDocumentSnapshots.toObjects(Message.class);
-                                                        // naplneni ui zpravami
-                                                        adapter = new MessageAdapter(getApplicationContext(), messagesList);
-                                                        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-                                                                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                                                                messageRecycler.setLayoutManager(layoutManager);
-                                                                messageRecycler.setAdapter(adapter);
-                                                                messageRecycler.scrollToPosition(messagesList.size()-1);
-                                                    }
-//
-                                                }
-                                            });
-
+                                    listenForMessages(chatId);
                                     sendMessageSetup(chatId);
                                 }
 
@@ -169,8 +149,38 @@ public class MessagingActivity extends AppCompatActivity {
                             // pridame ho mezi aktivni chaty prihlaseneho uzivatele
                             firestore.collection("Profiles").document(signedUser.getUid())
                                     .update("activeChats", FieldValue.arrayUnion(newId));
+                            listenForMessages(newId);
+                            sendMessageSetup(newId);
+                        }
+                    }
+                });
+    }
 
-                            sendMessageSetup(chatId);
+    private void listenForMessages(final String chat) {
+        firestore.collection("Chats")
+                .document(chat)
+                .collection("Messages")
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if(queryDocumentSnapshots != null) {
+                            // vytvoreni listu vsech zprav, serazenych podle timestamp
+                            List<Message> messagesList = queryDocumentSnapshots.toObjects(Message.class);
+
+                            for(DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()){
+                                if(doc.getString("recieverId").equals(signedUser.getUid())) {
+                                    doc.getReference().update("seen", true);
+                                }
+                            }
+
+                            // naplneni ui zpravami
+                            adapter = new MessageAdapter(getApplicationContext(), messagesList);
+                            LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+                            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                            messageRecycler.setLayoutManager(layoutManager);
+                            messageRecycler.setAdapter(adapter);
+                            messageRecycler.scrollToPosition(messagesList.size()-1);
                         }
                     }
                 });
@@ -195,9 +205,6 @@ public class MessagingActivity extends AppCompatActivity {
                 firestore.collection("Chats")
                         .document(chatId)
                         .update("lastMessageTime", newMessage.getTimestamp());
-
-
-
             }
         });
     }

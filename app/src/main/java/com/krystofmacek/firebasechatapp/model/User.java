@@ -11,6 +11,7 @@ import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +19,8 @@ import java.util.Map;
 public class User {
 
     private String uid;
-    private String displayName;
-    private Map<String, String> location;
+    private String displayName = "";
+    private Map<String, String> location = new HashMap<>();
     private List<String> tags = new ArrayList<>();
     private List<String> friends = new ArrayList<>();
     private List<String> activeChats = new ArrayList<>();
