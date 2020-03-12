@@ -63,7 +63,7 @@ public class NewConversationsFragment extends Fragment {
 
                 // nacteme vsechny chaty ve kterych je uzivatel clenem
                 firestoreService
-                        .queryByArrayContains("Cats", "members", signedUser.getUid())
+                        .queryByArrayContains("Chats", "members", signedUser.getUid())
                         .orderBy("lastMessageTime", Query.Direction.DESCENDING)
                         .addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
