@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class SearchFragment extends Fragment {
@@ -161,13 +162,14 @@ public class SearchFragment extends Fragment {
 
     private void extractLocation (Location location) {
         Address currentAddress;
-        Geocoder geocoder = new Geocoder(getContext());
+        Geocoder geocoder = new Geocoder(getContext(), Locale.ENGLISH);
         try {
             // prevedeni souradnic na adresu
             currentAddress = geocoder.getFromLocation(
                     location.getLatitude(),
                     location.getLongitude(),
                     1).get(0);
+
 
             // naplneni mapy lokaci, daty z adresy
             if(currentAddress!=null) {
