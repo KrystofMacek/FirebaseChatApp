@@ -28,9 +28,10 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.adapters.ProfileAdapter;
@@ -52,11 +53,12 @@ public class SearchFragment extends Fragment {
     private Spinner spinner;
     private Button searchUsersBtn;
 
-    private FirebaseUser signedUser;
+
+    private DocumentReference signedUser;
     private FirestoreService firestoreService;
 
 
-    //GeoLocation
+    //GeoLocation objekty
     private Map<String, String> address;
     private FusedLocationProviderClient locationProviderClient;
     private static final int LOCATION_REQUEST_CODE = 123;
@@ -74,8 +76,8 @@ public class SearchFragment extends Fragment {
         searchUsersBtn = view.findViewById(R.id.fSearch_searchUserBtn);
 
         // firebase obj
-        signedUser = FirebaseAuth.getInstance().getCurrentUser();
         firestoreService = new FirestoreService();
+        signedUser = firestoreService.getSignedUserDocumentRef();
 
         address = new HashMap<>();
 
@@ -106,23 +108,23 @@ public class SearchFragment extends Fragment {
             locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
             locationRequest.setInterval(ONE_MINUTE_INTERVAL);
             locationRequest.setFastestInterval(2000);
+
             locationProviderClient.requestLocationUpdates(locationRequest, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
                     Location location = locationResult.getLastLocation();
 
+                    /*
                     // V emulatoru vraci 37.421998 -122.084 = Google HQ
                     //  50.208917, 15.831632 = HK
-                    if(location.getLatitude() == 37.421998 && location.getLongitude() == -122.084) {
                         location.setLatitude(50.208917);
                         location.setLongitude(15.831632);
-                    }
+                    */
 
                     Log.i("Location", location.getLatitude() + " + " + location.getLongitude());
-                    if(location != null) {
-                        extractLocation(location);
-                    }
+                    extractLocation(location);
+
                 }
             }, Looper.getMainLooper());
 
@@ -135,15 +137,14 @@ public class SearchFragment extends Fragment {
                         }
                     }
                 });
-                if(address.size() == 0)
                 // aktualni lokace nebyla dostupna -> nacteme z firebase
-                        firestoreService.getSignedUserDocumentRef()
-                                .get()
-                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                if(address.size() == 0) {
+                    firestoreService.getSignedUserDocumentRef()
+                        .get()
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                 Map<String, String> fLocation = documentSnapshot.toObject(User.class).getLocation();
-
                                 if(fLocation != null && fLocation.size() > 0) {
                                     address.put("Country", fLocation.get("Country"));
                                     address.put("Region", fLocation.get("Region"));
@@ -151,15 +152,25 @@ public class SearchFragment extends Fragment {
                                 }
                             }
                         });
+                }
             }
             if(address.size() != 0) {
                 locationOutput.setText(address.get("City"));
             } else {
+
                 locationOutput.setText("Couldn\'t get your location");
+                /* Pro testovani pokud nelze ziskat lokaci
+                    address.put("Country", "Czechia");
+                    address.put("Region", "Královéhradecký kraj");
+                    address.put("City", "Náchod");
+                    // aktualizace lokace ve firestore
+                    firestoreService.updateField("Profiles", signedUser.getUid(), "location", address);
+                 */
             }
         }
     }
 
+    // metoda pro naplneni adressy informacecmi z objektu lokace
     private void extractLocation (Location location) {
         Address currentAddress;
         Geocoder geocoder = new Geocoder(getContext(), Locale.ENGLISH);
@@ -172,7 +183,8 @@ public class SearchFragment extends Fragment {
 
 
             // naplneni mapy lokaci, daty z adresy
-            if(currentAddress!=null) {
+            if(currentAddress != null) {
+
                 address.put("Country", currentAddress.getCountryName());
                 address.put("Region", currentAddress.getAdminArea());
                 address.put("City", currentAddress.getSubAdminArea());
@@ -180,7 +192,7 @@ public class SearchFragment extends Fragment {
                 setupLocationSpinner();
             }
             // aktualizace lokace ve firestore
-            firestoreService.updateField("Profiles", signedUser.getUid(), "location", address);
+            firestoreService.updateField("Profiles", signedUser.getId(), "location", address);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -225,9 +237,9 @@ public class SearchFragment extends Fragment {
             });
     }
 
-
+    // nastaveni tlacitka vyhledavaní uzivatel
     private void setupSearchUsers() {
-        // dle vyberu lokace je zavolana metoda queryProfiles
+        // Dle vyberu lokace je zavolana metoda queryProfiles
         searchUsersBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -246,6 +258,7 @@ public class SearchFragment extends Fragment {
         });
     }
 
+    // vyhledani uzivatel dle lokace a tagů
     private void queryProfiles(final String locationField, final String userLocation) {
 
         final List<User> profiles = new ArrayList<>();
@@ -266,7 +279,7 @@ public class SearchFragment extends Fragment {
                                 for(DocumentSnapshot profile : queryDocumentSnapshots.getDocuments()) {
                                     User u = profile.toObject(User.class);
                                     // uzivatel je pridan pokud != prihlasenemu a pokud jiz neni jeho friendslistu
-                                    if(u!=null && !profile.getId().equals(signedUser.getUid()) &&
+                                    if(u!=null && !profile.getId().equals(signedUser.getId()) &&
                                         !user.getFriends().contains(u.getUid())) {
                                         profiles.add(u);
                                     }

@@ -46,7 +46,7 @@ public class RecentConversationsFragment extends Fragment {
         return view;
     }
 
-
+    // Metoda pro vytvoreni seznamu nedavnych chatů
     private void loadRecentChats() {
         final List<Chat> recentChats = new ArrayList<>();
         // Nacteni dokumentu uzivatele
@@ -66,10 +66,12 @@ public class RecentConversationsFragment extends Fragment {
                             .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                 @Override
                                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+
                                     if(queryDocumentSnapshots != null) {
                                         recentChats.clear();
                                         recentChats.addAll(queryDocumentSnapshots.toObjects(Chat.class));
                                     }
+                                    // Vytvoreni UI seznamu
                                     ChatAdapter adapter = new ChatAdapter(getContext(), recentChats);
                                     LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
                                     layoutManager.setOrientation(LinearLayoutManager.VERTICAL);

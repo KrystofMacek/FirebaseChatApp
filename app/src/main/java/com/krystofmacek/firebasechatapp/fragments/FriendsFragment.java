@@ -42,26 +42,30 @@ public class FriendsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
         recyclerFriends = view.findViewById(R.id.fFriends_recycler);
-        // inicializace fireB objektu
+        // inicializace firestoreService objektu
         firestoreService = new FirestoreService();
+
         loadFriendsList();
 
         return view;
     }
-
+    // metoda pro vytvoreni seznamu pratel
     private void loadFriendsList() {
 
         final List<User> friendsList = new ArrayList<>();
         final List<String> ids = new ArrayList<>();
 
-        //nacteni seznamu pratel
+        // nacteni pratel
         firestoreService.getSignedUserDocumentRef()
                 .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                     @Override
                     public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                         ids.clear();
-                        User user = documentSnapshot.toObject(User.class);
-                        ids.addAll(user.getFriends());
+                        if(documentSnapshot !=null) {
+                            User user = documentSnapshot.toObject(User.class);
+                            ids.addAll(user.getFriends());
+                        }
+
                         if(ids.size() > 0) {
                             // z kolekce uzivatelu nacteme odpovidajici pratele
                             // seradime podle abecendy
@@ -74,6 +78,7 @@ public class FriendsFragment extends Fragment {
                                             friendsList.clear();
                                             friendsList.addAll(queryDocumentSnapshots.toObjects(User.class));
 
+                                            // Vytvoreni UI seznamu
                                             FriendAdapter adapter = new FriendAdapter(getContext(), friendsList);
                                             LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
                                             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);

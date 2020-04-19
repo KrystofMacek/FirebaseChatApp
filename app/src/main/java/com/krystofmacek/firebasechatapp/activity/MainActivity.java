@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // vychozi fragment -> Home
+        // Nastavení výchozího fragmentu
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_home);
         if(fragment == null || !fragment.isInLayout()) {
             FragmentTransaction ft =
@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.top_bar_dropdown_menu, menu);
         return true;
     }
+
     // dropdown menu vyber itemu
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -136,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
                 .requestEmail()
                 .build());
         googleClient.signOut();
-        //finish();
     }
 
     // nastaveni navigace mezi fragmenty vuzitim BackButton

@@ -16,8 +16,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
@@ -32,18 +32,19 @@ import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.List;
 
+// Vytvoreni polozky seznamu pratel
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder>{
 
     private Context context;
     private List<User> profiles;
-    private FirebaseUser signedUser;
+    private DocumentReference signedUser;
     private FirestoreService firestoreService;
 
     public FriendAdapter(Context context, List<User> profiles) {
         this.context = context;
         this.profiles = profiles;
-        signedUser = FirebaseAuth.getInstance().getCurrentUser();
         firestoreService = new FirestoreService();
+        signedUser = firestoreService.getSignedUserDocumentRef();
     }
 
     @NonNull
@@ -69,6 +70,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         }
     }
 
+    // naplneni elementu ui
     @Override
     public void onBindViewHolder(@NonNull FriendAdapter.ViewHolder holder, int position) {
 
@@ -78,6 +80,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
         getLastMessage(holder.lastMessage, profile.getUid());
 
+        //tlacitko spusteni chatu
         holder.itemView.findViewById(R.id.item_friend_btnStartChat).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,6 +90,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             }
         });
 
+        // odstraneni uzivatele z pratel
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -100,7 +104,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 remove.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        firestoreService.updateField("Profiles",signedUser.getUid(), "friends", FieldValue.arrayRemove(profile.getUid()));
+                        firestoreService.updateField("Profiles",signedUser.getId(), "friends", FieldValue.arrayRemove(profile.getUid()));
                         removeFriendDialog.cancel();
                     }
                 });
@@ -124,6 +128,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     }
 
 
+    // nacteni poslední zpravy
     private void getLastMessage(final TextView lastMessageView, final String friendId) {
         // Najdeme odpovidajici Chat
         firestoreService.queryByArrayContains("Chats", "members", friendId)
@@ -133,8 +138,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 for(DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                     Chat chat = doc.toObject(Chat.class);
                     if(chat != null) {
-                        if(chat.getMembers().get(0).equals(signedUser.getUid()) ||
-                                chat.getMembers().get(1).equals(signedUser.getUid())){
+                        if(chat.getMembers().get(0).equals(signedUser.getId()) ||
+                                chat.getMembers().get(1).equals(signedUser.getId())){
                             // Z chatu dostaneme posledni zpravu
                             firestoreService.queryForLastMessage(chat.getUid())
                                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -144,7 +149,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                                 DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
                                                 Message lastMessage = doc.toObject(Message.class);
                                                 lastMessageView.setText(lastMessage.getMessageText());
-                                                if(!lastMessage.getAuthorId().equals(signedUser.getUid())) {
+                                                if(!lastMessage.getAuthorId().equals(signedUser.getId())) {
                                                     lastMessageView
                                                             .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
                                                 }

@@ -50,6 +50,7 @@ public class NewConversationsFragment extends Fragment {
         return view;
     }
 
+    // Metoda pro vytvoreni seznamu novych chatů
     private void loadNewChats() {
         final List<Chat> newChats = new ArrayList<>();
 
@@ -71,7 +72,7 @@ public class NewConversationsFragment extends Fragment {
                                 newChats.clear();
                                 if(queryDocumentSnapshots != null) {
                                     List<Chat> allChats = queryDocumentSnapshots.toObjects(Chat.class);
-                                    // zjistime ktere z nactenych jsou nove
+                                    // zjistime ktere z nactenych jsou nove - (nejsou mezi aktivními chaty prihlaseneho uzivatele)
                                     for(Chat c : allChats) {
                                         boolean isNewChat = true;
                                         for(String activeChatId : activeChats) {
@@ -85,7 +86,7 @@ public class NewConversationsFragment extends Fragment {
                                         }
                                     }
                                 }
-                                // zobrazime seznam novych chatu
+                                // Vytvoreni UI seznamu
                                 ChatAdapter adapter = new ChatAdapter(getContext(), newChats);
                                 LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
                                 layoutManager.setOrientation(LinearLayoutManager.VERTICAL);

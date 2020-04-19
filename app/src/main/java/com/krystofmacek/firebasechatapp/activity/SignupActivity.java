@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private AuthUI mAuthUI;
     //request code value
     private static final int RC_SIGN_IN = 123;
 
@@ -26,54 +25,61 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        mAuthUI = AuthUI.getInstance();
-
-        // Enable sign-in providers
-        startActivityForResult(mAuthUI
+        AuthUI mAuthUI = AuthUI.getInstance();
+        // Pridani jednotlivych sign-in poskytovatelu
+        startActivityForResult(
+                    mAuthUI
                         .createSignInIntentBuilder()
                         .setAvailableProviders(Arrays.asList(
-                                new AuthUI.IdpConfig.EmailBuilder().setRequireName(false).build(),
-                                new AuthUI.IdpConfig.GoogleBuilder().setSignInOptions(
-                                        new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                                .requestIdToken(getString(R.string.default_web_client_id))
-                                                .requestEmail()
-                                                .build()
-                                ).build(),
-                                new AuthUI.IdpConfig.FacebookBuilder().build()
+                                // Email-Heslo
+                                new AuthUI.IdpConfig
+                                        .EmailBuilder()
+                                        .setRequireName(false)
+                                        .build(),
+                                // Google Account
+                                new AuthUI.IdpConfig
+                                        .GoogleBuilder()
+                                        .setSignInOptions(
+                                            new GoogleSignInOptions
+                                                    .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                                    .requestIdToken(getString(R.string.default_web_client_id))
+                                                    .requestEmail()
+                                                    .build()
+                                        ).build(),
+                                // Facebook account
+                                new AuthUI.IdpConfig
+                                        .FacebookBuilder()
+                                        .build()
                         ))
-                .setIsSmartLockEnabled(false)
-                        .setLogo(R.drawable.splash_image)
-                        .build(),
-                RC_SIGN_IN);
+                        .setIsSmartLockEnabled(false)
+                        .setLogo(R.drawable.ic_launcher_round)
+                        .build(), RC_SIGN_IN);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
+        // RC_SIGN_IN je stejny jako pozadavek ktery jsme vlozili do
+        // metody startActivityForResult(...) na zacatku prihlasovaciho procesu.
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
-            Intent intent;
 
-            // Successfully signed in
+            // V pripade uspesneho prihlaseni
             if (resultCode == RESULT_OK) {
-                intent = new Intent(SignupActivity.this, MainActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(SignupActivity.this, MainActivity.class));
                 finish();
             } else {
-                // Sign in failed
+                // pripad zruseni prihlaseni
                 if (response == null) {
-                    // User pressed back button
+                    // uzivatel zrusil prihlasovaci proces
                     Toast.makeText(this, "Sign in cancelled.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                // prihlaseni se nepodarilo z duvodu nedostupnosti internetu
                 if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Toast.makeText(this, "No internet connection.", Toast.LENGTH_SHORT).show();
-                    return;
                 }
-                Toast.makeText(this, "Unknown error", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -83,4 +89,5 @@ public class SignupActivity extends AppCompatActivity {
         super.onBackPressed();
         finish();
     }
+
 }

@@ -11,35 +11,29 @@ import com.krystofmacek.firebasechatapp.R;
 
 public class SplashScreenActivity extends AppCompatActivity {
 
-    private FirebaseAuth auth;
-    private FirebaseUser user;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
         //inicializace firestore a prihlaseneho uzivatele
-        auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
 
         Intent intent;
 
-        // pokud neni nikdo prihlasen spusti se signUp aktivita
+        // pokud neni nikdo prihlasen spusti se aktivita signUp
         if(user == null) {
             intent = new Intent(getApplicationContext(), SignupActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
-            // jinak se spusti main aktivita
+            // jinak se spusti aktivita main
         } else {
             intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         }
-
-
     }
 }

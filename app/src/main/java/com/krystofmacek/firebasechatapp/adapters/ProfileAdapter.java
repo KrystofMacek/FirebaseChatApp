@@ -10,20 +10,24 @@ import android.widget.TextView;
 import com.krystofmacek.firebasechatapp.R;
 import com.krystofmacek.firebasechatapp.activity.MessagingActivity;
 import com.krystofmacek.firebasechatapp.model.User;
+import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+// Vytvoreni polozky seznamu nalezenych uzivatel
 public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHolder>{
 
     private Context context;
     private List<User> profiles;
+    private FirestoreService firestoreService;
 
     public ProfileAdapter(Context context, List<User> profiles) {
         this.context = context;
         this.profiles = profiles;
+        firestoreService = new FirestoreService();
     }
 
     @NonNull
@@ -35,6 +39,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ProfileAdapter.ViewHolder holder, int position) {
+        // Naplneni ui
         final User profile = profiles.get(position);
         String username = profile.getDisplayName();
         holder.username.setText(username);
@@ -48,6 +53,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
                 context.startActivity(intent);
             }
         });
+
     }
     public class ViewHolder extends RecyclerView.ViewHolder {
 

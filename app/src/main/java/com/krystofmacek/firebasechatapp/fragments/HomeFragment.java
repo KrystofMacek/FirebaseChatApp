@@ -63,7 +63,6 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-
         // inicializace ui elemntu
         viewTxtUsername = view.findViewById(R.id.fHome_username);
         viewTxtTags = view.findViewById(R.id.fHome_tags);
@@ -131,6 +130,7 @@ public class HomeFragment extends Fragment {
                             }
                             ChatAdapter adapter = new ChatAdapter(getContext(), chats);
 
+                            // Vytvoreni UI seznamu
                             LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
                             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
                             recyclerRecentChats.setLayoutManager(layoutManager);
@@ -218,7 +218,9 @@ public class HomeFragment extends Fragment {
                     public void onClick(View view) {
                         signedUserObject.setDisplayName(editUsername.getText().toString());
                         signedUserObject.setUid(signedUser.getUid());
+
                         firestoreService.getSignedUserDocumentRef().set(signedUserObject);
+
                         setRegistrationToken();
 
                         Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_LONG).show();
@@ -230,6 +232,8 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
+    // Nastaveni tokenu registrace, který je použit pro upozorneni
     private void setRegistrationToken() {
         FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {

@@ -5,22 +5,27 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+
 public class MessageNotificationsService extends FirebaseMessagingService {
 
+    FirestoreService firestoreService = new FirestoreService();
+    // Aktualizace registracniho tokenu při přijetí nového
     @Override
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
+        FirebaseUser signedUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        String signedUser = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore.getInstance().collection("Profiles")
-                .document(signedUser)
-                .update("registrationToken", s);
+        if(signedUser != null) {
+            // aktualizace pole v databázi
+            firestoreService.updateField("Profiles", signedUser.getUid(), "registrationToken", s);
+        }
     }
 
+    // Zpracování přijetí upozornění
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);

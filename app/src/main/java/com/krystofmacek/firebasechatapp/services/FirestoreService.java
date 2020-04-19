@@ -1,5 +1,6 @@
 package com.krystofmacek.firebasechatapp.services;
 
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -17,27 +18,27 @@ import java.util.List;
 
 public class FirestoreService {
 
-    private FirebaseFirestore firestore;
-    private FirebaseAuth auth;
-
-    private CollectionReference chatsReference;
-    private CollectionReference profilesReference;
-
-    private FirebaseUser signedUser;
+    private final FirebaseUser signedUser;
+    private final FirebaseFirestore firestore;
+    private final CollectionReference chatsReference;
+    private final CollectionReference profilesReference;
 
     public FirestoreService() {
+        signedUser = FirebaseAuth.getInstance().getCurrentUser();
         firestore = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-
         chatsReference = firestore.collection("Chats");
         profilesReference = firestore.collection("Profiles");
-
-        signedUser = auth.getCurrentUser();
     }
 
-    //Handle chats
+    // get referenci na dokument Profilu, prihlaseneho uzivatele
+    public DocumentReference getSignedUserDocumentRef() {
+        return profilesReference
+                .document(signedUser.getUid());
+    }
+
+    //Vytvoreni noveho dokumentu Chat
     public String initializeNewChat(final String otherUserId) {
-        // vytvoreni noveho dokumentu
+
         DocumentReference newChatReference = chatsReference.document();
         String newId = newChatReference.getId();
         List<String> members = new ArrayList<>();
@@ -47,13 +48,9 @@ public class FirestoreService {
                 newId,
                 members
         );
-        firestore.collection("Chats").document(newId)
-                .set(chat);
-
-        // pridame ho mezi aktivni chaty prihlaseneho uzivatele
-        firestore.collection("Profiles").document(signedUser.getUid())
-                .update("activeChats", FieldValue.arrayUnion(newId));
-
+        chatsReference.document(newId).set(chat);
+        // id dokumentu pridame mezi aktivni chaty prihlaseneho uzivatele
+        getSignedUserDocumentRef().update("activeChats", FieldValue.arrayUnion(newId));
         return newId;
     }
 
@@ -63,41 +60,38 @@ public class FirestoreService {
     }
 
 
-    // Handle messages
+    // nacteni zprav serazenych dle casu odeslani
     public Query queryMessageCollection(final String chatId) {
-        return firestore.collection("Chats")
+        return chatsReference
                 .document(chatId)
                 .collection("Messages")
                 .orderBy("timestamp", Query.Direction.ASCENDING);
     }
 
+    // nacteni posledni zpravy chatu
     public Query queryForLastMessage(final String chatId) {
-        return firestore
-                .collection("Chats")
+        return chatsReference
                 .document(chatId)
                 .collection("Messages").orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(1);
     }
 
-    // Vraci prazdny dokument zpravy
+    // Vtvoreni prázdného dokumentu chat
     public DocumentReference getEmptyMessageDocument(final String chatId) {
-        return firestore.collection("Chats")
+        return chatsReference
                 .document(chatId)
                 .collection("Messages")
                 .document();
     }
 
-    public DocumentReference getSignedUserDocumentRef() {
-        return firestore.collection("Profiles")
-                .document(signedUser.getUid());
-    }
+
 
     // searchUsers Query
     public Task<QuerySnapshot> searchUsersQuery(final String locationField, final String userLocation, final List<String> tags) {
-        return firestore.collection("Profiles")
+        return profilesReference
                 .whereEqualTo(locationField, userLocation)
                 .whereArrayContainsAny("tags", tags)
-                .limit(50)
+                .limit(10)
                 .get();
     }
 
@@ -107,19 +101,24 @@ public class FirestoreService {
                 .document(document)
                 .update(field, value);
     }
+
+    // pristup ke konkretnimu dokumentu
     public DocumentReference getDocumentReference(final String collection, final String documentId) {
         return firestore.collection(collection)
                 .document(documentId);
     }
-
+    // Nacteni dokumentu, které mají pole typu Array obsahující specifikovanou hodnotu
     public Query queryByArrayContains(final String collection, final String array, final Object value) {
         return firestore.collection(collection)
                 .whereArrayContains(array, value);
     }
 
+    // Nacteni dokumentu, kde specifikované pole obsahuje jednu z hodnot ze seznamu
     public Query queryByWhereIn(final String collection, final String field, final List<String> values) {
         return firestore.collection(collection)
                 .whereIn(field, values);
     }
+
+
 
 }

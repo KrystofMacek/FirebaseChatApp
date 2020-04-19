@@ -20,8 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -39,20 +37,21 @@ import java.util.List;
 
 public class MessagingActivity extends AppCompatActivity {
 
+    // ui elementy
     private ImageButton sendMsgBtn;
     private EditText inputMessageText;
     private RecyclerView messageRecycler;
     private TextView heading;
     private ImageButton addFriendButton;
     private LinearLayout addFriendBar;
-
-    private FirebaseUser signedUser;
     private String chatId;
 
+    // firesbase obj
     private FirestoreService firestoreService;
+    private DocumentReference signedUser;
 
-    MessageAdapter adapter;
-    String userId;
+    private MessageAdapter adapter;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +65,8 @@ public class MessagingActivity extends AppCompatActivity {
         addFriendButton = findViewById(R.id.messaging_addFriendButton);
         addFriendBar = findViewById(R.id.messaging_addFriendBar);
 
-        //inicializace firestore a prihlaseneho uzivatele
-        signedUser = FirebaseAuth.getInstance().getCurrentUser();
+        //inicializace firestore service a prihlaseneho uzivatele
+        signedUser = firestoreService.getSignedUserDocumentRef();
 
         firestoreService = new FirestoreService();
 
@@ -103,7 +102,6 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void loadMessages(final String userId){
-
         //Nacteni chatu daneho uzivatele
         firestoreService
                 .queryByArrayContains("Chats", "members", userId)
@@ -114,8 +112,8 @@ public class MessagingActivity extends AppCompatActivity {
                         boolean newChat = true;
                         for(DocumentSnapshot snap : queryDocumentSnapshots.getDocuments()) {
                             Chat chat = snap.toObject(Chat.class);
-                            // vyber chatu kde members obsahuje obe id
-                            if(chat.getOtherMember(userId).equals(signedUser.getUid())) {
+                            // vyber chat kde members obsahuje obje id
+                            if(chat.getOtherMember(userId).equals(signedUser.getId())) {
                                 chatId = chat.getUid();
                                 newChat = false;
                                 if(chatId != null) {
@@ -139,6 +137,7 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void listenForMessages(final String chat) {
+        // pridame snapshot listener na kolekci zpráv
         firestoreService.queryMessageCollection(chat)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -147,8 +146,9 @@ public class MessagingActivity extends AppCompatActivity {
                             // vytvoreni listu vsech zprav, serazenych podle timestamp
                             List<Message> messagesList = queryDocumentSnapshots.toObjects(Message.class);
 
+                            // aktualizace zprav na prectene
                             for(DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()){
-                                if(doc.getString("recieverId").equals(signedUser.getUid())) {
+                                if(doc.getString("recieverId").equals(signedUser.getId())) {
                                     doc.getReference().update("seen", true);
                                 }
                             }
@@ -174,7 +174,7 @@ public class MessagingActivity extends AppCompatActivity {
                 final DocumentReference newMessageDoc = firestoreService.getEmptyMessageDocument(chatId);
                 // Do dokumentu se ulozi objekt nove zpravy
                 Message newMessage = new Message(
-                        signedUser.getUid(),
+                        signedUser.getId(),
                         userId,
                         inputMessageText.getText().toString(),
                         Timestamp.now());
@@ -228,7 +228,7 @@ public class MessagingActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View view) {
                                 firestoreService
-                                        .updateField("Profiles", signedUser.getUid(), "friends", FieldValue.arrayUnion(userId));
+                                        .updateField("Profiles", signedUser.getId(), "friends", FieldValue.arrayUnion(userId));
                                 confirmFriendDialog.cancel();
                                 addFriendBar.setVisibility(View.GONE);
                             }

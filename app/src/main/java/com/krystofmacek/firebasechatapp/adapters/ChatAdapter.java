@@ -13,8 +13,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.krystofmacek.firebasechatapp.R;
@@ -26,19 +26,20 @@ import com.krystofmacek.firebasechatapp.services.FirestoreService;
 
 import java.util.List;
 
+// Vytvoreni polozky seznamu chatů
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     private Context context;
     private List<Chat> chats;
-    private FirebaseUser signedUser;
+    private DocumentReference signedUser;
     private FirestoreService firestoreService;
 
 
     public ChatAdapter(Context context, List<Chat> chats) {
         this.context = context;
         this.chats = chats;
-        signedUser = FirebaseAuth.getInstance().getCurrentUser();
         firestoreService = new FirestoreService();
+        signedUser = firestoreService.getSignedUserDocumentRef();
     }
 
     @NonNull
@@ -68,7 +69,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull final ChatAdapter.ViewHolder holder, int position) {
         final Chat chat = chats.get(position);
-        String userId = chat.getOtherMember(signedUser.getUid());
+        String userId = chat.getOtherMember(signedUser.getId());
         // nacteni uzivatelskeho jmena
         firestoreService
                 .getDocumentReference("Profiles", userId)
@@ -89,7 +90,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, MessagingActivity.class);
-                intent.putExtra("userid", chat.getOtherMember(signedUser.getUid()));
+                intent.putExtra("userid", chat.getOtherMember(signedUser.getId()));
                 context.startActivity(intent);
             }
         });
@@ -106,7 +107,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
                     DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
                     Message lastMessage = doc.toObject(Message.class);
                     lastMessageView.setText(lastMessage.getMessageText());
-                    if(lastMessage.getAuthorId() != null && !lastMessage.getAuthorId().equals(signedUser.getUid())) {
+                    if(lastMessage.getAuthorId() != null && !lastMessage.getAuthorId().equals(signedUser.getId())) {
                         lastMessageView
                                 .setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
                     }
