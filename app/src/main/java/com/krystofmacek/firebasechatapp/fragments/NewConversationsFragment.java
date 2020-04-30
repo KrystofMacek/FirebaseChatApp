@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -31,7 +32,7 @@ import java.util.List;
 public class NewConversationsFragment extends Fragment {
 
     private FirestoreService firestoreService;
-    private FirebaseUser signedUser;
+    private DocumentReference signedUser;
     private RecyclerView newChatRecycler;
 
     @Override
@@ -40,8 +41,9 @@ public class NewConversationsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_new_conversations, container, false);
 
         // inicializce ui a fireb obj
-        signedUser = FirebaseAuth.getInstance().getCurrentUser();
         firestoreService = new FirestoreService();
+        signedUser = firestoreService.getSignedUserDocumentRef();
+
 
         newChatRecycler = view.findViewById(R.id.fChats_New_recycler);
 
@@ -64,7 +66,7 @@ public class NewConversationsFragment extends Fragment {
 
                 // nacteme vsechny chaty ve kterych je uzivatel clenem
                 firestoreService
-                        .queryByArrayContains("Chats", "members", signedUser.getUid())
+                        .queryByArrayContains("Chats", "members", signedUser.getId())
                         .orderBy("lastMessageTime", Query.Direction.DESCENDING)
                         .addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override

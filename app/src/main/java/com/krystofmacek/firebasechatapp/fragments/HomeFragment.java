@@ -70,8 +70,9 @@ public class HomeFragment extends Fragment {
         recyclerRecentChats = view.findViewById(R.id.fHome_recycler);
 
         //firebase objekty
-        signedUser = FirebaseAuth.getInstance().getCurrentUser();
         firestoreService = new FirestoreService();
+        signedUser = FirebaseAuth.getInstance().getCurrentUser();
+
 
         loadUser();
         setupDialog();

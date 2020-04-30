@@ -157,15 +157,15 @@ public class SearchFragment extends Fragment {
             if(address.size() != 0) {
                 locationOutput.setText(address.get("City"));
             } else {
-
+                /*
                 locationOutput.setText("Couldn\'t get your location");
-                /* Pro testovani pokud nelze ziskat lokaci
+                 //Pro testovani pokud nelze ziskat lokaci
                     address.put("Country", "Czechia");
                     address.put("Region", "Královéhradecký kraj");
                     address.put("City", "Náchod");
                     // aktualizace lokace ve firestore
-                    firestoreService.updateField("Profiles", signedUser.getUid(), "location", address);
-                 */
+                    firestoreService.updateField("Profiles", signedUser.getId(), "location", address);
+*/
             }
         }
     }

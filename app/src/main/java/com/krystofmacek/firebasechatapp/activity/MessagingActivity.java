@@ -65,10 +65,10 @@ public class MessagingActivity extends AppCompatActivity {
         addFriendButton = findViewById(R.id.messaging_addFriendButton);
         addFriendBar = findViewById(R.id.messaging_addFriendBar);
 
-        //inicializace firestore service a prihlaseneho uzivatele
-        signedUser = firestoreService.getSignedUserDocumentRef();
 
+        //inicializace firestore service a prihlaseneho uzivatele
         firestoreService = new FirestoreService();
+        signedUser = firestoreService.getSignedUserDocumentRef();
 
         // nacteni ID uzivatele s kterym komunikujeme
         userId = getIntent().getStringExtra("userid");
